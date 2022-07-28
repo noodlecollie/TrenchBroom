@@ -1,3 +1,9 @@
+As per [here](https://github.com/TrenchBroom/TrenchBroom/issues/4072), these changes probably won't be useful to TrenchBroom in general, so they should stay on this fork. Annoyingly, this will require more maintenance, so the plan is:
+
+* The `development` branch will be the main branch of the fork, which holds completed/relatively stable code.
+* Individual features will be developed by branching off `development` and then merging back in with a squash commit.
+* When upstream creates a new release that we want to use, we can update local `master` to mirror `upstream/master` and then rebase `development` on the release tag.
+
 ## V0 (minimum required)
 
 * Use an asset scheme where content is sourced from VPKs, plus directories on disk.
@@ -20,6 +26,7 @@ Potentially useful libraries for reading assets:
 
 * Can the TF2 FGD be loaded as-is, or does TB fall over? If the syntax is supported as-is, that makes our life easier.
 * Should MAP2VMF be written as an external utility, or written into TB?
+	* I'm leaning towards writing it into the editor, in the same way that "export to .obj" is done.
 
 ## V1
 
@@ -32,14 +39,39 @@ There is no obvious library on GitHub for reading MDLs. [Assimp](https://github.
 
 ### Entity I/O
 
-This implementation will be non-trivial. It will require at least a new UI to be built to configure I/O properties. It will also potentially need to visualise entity links as TB does for other things, allow picking entities by clicking on them, and tie into problem reporting.
+This implementation will be non-trivial. It will require at least a new UI to be built to configure I/O properties. It will also potentially need to visualise entity links as TB does for other things, allow picking entities by clicking on them, and tie into problem reporting. It could even have a script-like text syntax, to make setting up bulk I/O easier?
+
+```
+Output        Target    Input       Variant                Delay
+OnStartTouch->other_ent:ShowMessage("This is an argument")[0.5]
+```
+
+One option, until we implement a proper UI, could be to create I/O links by adding TB-specific properties to entities using this syntax, and then converting the syntax to a proper I/O string when saving to VMF. For example:
+
+```
+_tb_source_io_0 "OnStartTouch->other_ent:ShowMessage(\"This is an argument\")[0.5]"
+_tb_source_io_1 "..."
+```
+
+This would at least allow us to specify I/O without needing a specific UI.
 
 ## V2
 
 * Add support for displacement editing (geometry and blending).
 
+### Implementation
+
+This implementation will be _extrememly_ non-trivial. The easiest way for us to put together a usable feature set would be:
+
+* Allow subdivision powers of 2, 3, or 4.
+* Allow moving vertices, or groups of vertices, in the 2D views.
+* Allow alpha painting in the 3D view.
+* Allow sewing adjacent displacements.
+
+Fancier brush types, and moving along face normals and in 3D space, could be added in future. The encoding of displacements in VMF files would need to be researched, to see whether there's anything special in there regarding saving neighbours which have been sewn together.
+
 ## V2+ (QoL)
 
 * Rendering of particle systems.
-* Easier texture/model browsing.
+* Easier texture/model/sound browsing.
 * Viewing collision models.
