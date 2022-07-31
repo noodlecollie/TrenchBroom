@@ -27,6 +27,8 @@
 #include "IO/IdPakFileSystem.h"
 #include "IO/Quake3ShaderFileSystem.h"
 #include "IO/SystemPaths.h"
+#include "IO/VpkFileSystem.h"
+#include "IO/VpkUtils.h"
 #include "IO/ZipFileSystem.h"
 #include "Logger.h"
 #include "Model/GameConfig.h"
@@ -118,9 +120,17 @@ void GameFileSystem::addFileSystemPackages(
   const auto& packageExtensions = packageFormatConfig.extensions;
   const auto& packageFormat = packageFormatConfig.format;
 
+  const bool filterVpks =
+    std::find(packageExtensions.begin(), packageExtensions.end(), "vpk") != packageExtensions.end();
+
   if (IO::Disk::directoryExists(searchPath)) {
     const IO::DiskFileSystem diskFS(searchPath);
     auto packages = diskFS.findItems(IO::Path(""), IO::FileExtensionMatcher(packageExtensions));
+
+    if (filterVpks) {
+      packages = IO::Vpk::removeIndexedArchivesFromList(packages);
+    }
+
     packages = kdl::vec_sort(std::move(packages), IO::Path::Less<kdl::ci::string_less>());
 
     for (const auto& packagePath : packages) {
@@ -134,6 +144,10 @@ void GameFileSystem::addFileSystemPackages(
         } else if (kdl::ci::str_is_equal(packageFormat, "zip")) {
           logger.info() << "Adding file system package " << packagePath;
           m_next = std::make_shared<IO::ZipFileSystem>(m_next, diskFS.makeAbsolute(packagePath));
+        } else if (kdl::ci::str_is_equal(packageFormat, "vpk")) {
+          logger.info() << "Adding file system package " << packagePath;
+          m_next =
+            std::make_shared<IO::VpkFileSystem>(m_next, diskFS.makeAbsolute(packagePath), logger);
         }
       } catch (const std::exception& e) { logger.error() << e.what(); }
     }
