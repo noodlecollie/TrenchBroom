@@ -90,6 +90,7 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/IO/TextureCollectionLoader.cpp
         ${COMMON_SOURCE_DIR}/IO/TextureLoader.cpp
         ${COMMON_SOURCE_DIR}/IO/TextureReader.cpp
+        ${COMMON_SOURCE_DIR}/IO/VmtTextureReader.cpp
         ${COMMON_SOURCE_DIR}/IO/VpkFileSystem.cpp
         ${COMMON_SOURCE_DIR}/IO/VpkUtils.cpp
         ${COMMON_SOURCE_DIR}/IO/WadFileSystem.cpp
@@ -581,8 +582,15 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/IO/TextureReader.h
         ${COMMON_SOURCE_DIR}/IO/Token.h
         ${COMMON_SOURCE_DIR}/IO/Tokenizer.h
+        ${COMMON_SOURCE_DIR}/IO/VmtTextureReader.h
         ${COMMON_SOURCE_DIR}/IO/VpkFileSystem.h
         ${COMMON_SOURCE_DIR}/IO/VpkUtils.h
+        ${COMMON_SOURCE_DIR}/IO/VtfDefs.h
+        ${COMMON_SOURCE_DIR}/IO/VtfHeaderBuffer.h
+        ${COMMON_SOURCE_DIR}/IO/VtfHeaderBuffer.cpp
+        ${COMMON_SOURCE_DIR}/IO/VtfDefs.cpp
+        ${COMMON_SOURCE_DIR}/IO/VtfUtils.h
+        ${COMMON_SOURCE_DIR}/IO/VtfUtils.cpp
         ${COMMON_SOURCE_DIR}/IO/WadFileSystem.h
         ${COMMON_SOURCE_DIR}/IO/WalTextureReader.h
         ${COMMON_SOURCE_DIR}/IO/WorldReader.h

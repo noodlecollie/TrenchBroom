@@ -80,12 +80,15 @@ private:
 
 public:
   DirectoryTextureCollectionLoader(
-    Logger& logger, const FileSystem& gameFS, const std::vector<std::string>& exclusions);
+    Logger& logger, const FileSystem& gameFS, const std::vector<std::string>& exclusions,
+    bool forceRecursiveSearch);
 
 private:
   Assets::TextureCollection loadTextureCollection(
     const Path& path, const std::vector<std::string>& textureExtensions,
     const TextureReader& textureReader);
+
+  bool m_forceRecursiveSearch;
 };
 } // namespace IO
 } // namespace TrenchBroom

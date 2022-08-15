@@ -204,6 +204,10 @@ void VpkFileSystem::doReadDirectory() {
     dirTreeReader, OffsetLengthPair{fileDataOffset, header.fileDataSectionSize});
 }
 
+Path VpkFileSystem::doMakeAbsolute(const Path& path) const {
+  return m_path.deleteLastComponent() + path;
+}
+
 void VpkFileSystem::readAndParseDirectoryListing(
   Reader& dirTreeReader, const OffsetLengthPair& dirFileData) {
   while (true) {

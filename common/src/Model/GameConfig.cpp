@@ -68,6 +68,18 @@ IO::Path getRootDirectory(const TexturePackageConfig& texturePackageConfig) {
     texturePackageConfig);
 }
 
+bool isRootDirectoryASingleTextureCollection(const TexturePackageConfig& texturePackageConfig) {
+  return std::visit(
+    kdl::overload(
+      [](const TextureFilePackageConfig&) {
+        return false;
+      },
+      [](const TextureDirectoryPackageConfig& directoryConfig) {
+        return directoryConfig.singleCollection;
+      }),
+    texturePackageConfig);
+}
+
 kdl_reflect_impl(TextureConfig);
 
 kdl_reflect_impl(EntityConfig);

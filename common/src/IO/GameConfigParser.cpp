@@ -167,7 +167,7 @@ Model::TexturePackageConfig GameConfigParser::parseTexturePackageConfig(
   expectStructure(
     value, "["
            "{'type': 'String'},"
-           "{'root': 'String', 'format': 'Map'}"
+           "{'root': 'String', 'format': 'Map', 'singleCollection': 'Boolean'}"
            "]");
 
   const std::string typeStr = value["type"].stringValue();
@@ -176,7 +176,15 @@ Model::TexturePackageConfig GameConfigParser::parseTexturePackageConfig(
     return Model::TextureFilePackageConfig{parsePackageFormatConfig(value["format"])};
   } else if (typeStr == "directory") {
     expectMapEntry(value, "root", EL::ValueType::String);
-    return Model::TextureDirectoryPackageConfig{Path{value["root"].stringValue()}};
+
+    bool singleCollection = false;
+    if (value.contains("singleCollection")) {
+      expectMapEntry(value, "singleCollection", EL::ValueType::Boolean);
+      singleCollection = value["singleCollection"].booleanValue();
+    }
+
+    return Model::TextureDirectoryPackageConfig{
+      Path{value["root"].stringValue()}, singleCollection};
   } else {
     throw ParserException(
       value.line(), value.column(), "Unexpected texture package type '" + typeStr + "'");

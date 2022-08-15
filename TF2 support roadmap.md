@@ -7,7 +7,9 @@ As per [here](https://github.com/TrenchBroom/TrenchBroom/issues/4072), these cha
 ## V0 (minimum required)
 
 * Use an asset scheme where content is sourced from VPKs, plus directories on disk.
+	* This is done, at least in a first pass.
 * Add support for reading VPKs and VMT/VTF files for textures.
+	* Again, done in a limited way for the first pass.
 * Add support for reading TF2 FGD. If there's fancy stuff in there (eg. entity I/O), just ignore it for now.
 * Add support for exporting MAP to VMF. Unclear whether this would be better implemented as an external utility or an internal routine.
 

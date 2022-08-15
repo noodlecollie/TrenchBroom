@@ -333,6 +333,11 @@ bool GameImpl::doIsTextureCollection(const IO::Path& path) const {
 std::vector<IO::Path> GameImpl::doFindTextureCollections() const {
   try {
     const auto searchPath = getRootDirectory(m_config.textureConfig.package);
+
+    if (isRootDirectoryASingleTextureCollection(m_config.textureConfig.package)) {
+      return std::vector<IO::Path>({searchPath});
+    }
+
     if (!searchPath.isEmpty() && m_fs.directoryExists(searchPath)) {
       return kdl::vec_concat(
         std::vector<IO::Path>({searchPath}),

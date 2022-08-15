@@ -43,6 +43,7 @@ private:
   };
 
   void doReadDirectory() override;
+  Path doMakeAbsolute(const Path& path) const override;
 
   static std::string readNTString(Reader& reader);
   static void readDirEntry(Reader& dirTreeReader, const Path& path, DirEntry& entry);
@@ -52,7 +53,7 @@ private:
   void addFile(const Path& path, const DirEntry& entry, const OffsetLengthPair& dirFileData);
   void addFile(
     const Path& path, const std::shared_ptr<CFile>& archive, const OffsetLengthPair& fileExtent,
-    OffsetLengthPair archiveExtent = OffsetLengthPair{});
+    OffsetLengthPair archiveExtent = OffsetLengthPair{0, 0});
 
   Logger& m_logger;
   std::shared_ptr<CFile> m_dirFile;

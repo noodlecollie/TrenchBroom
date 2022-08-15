@@ -31,6 +31,7 @@
 #include "IO/Path.h"
 #include "IO/Quake3ShaderTextureReader.h"
 #include "IO/TextureCollectionLoader.h"
+#include "IO/VmtTextureReader.h"
 #include "IO/WalTextureReader.h"
 #include "Logger.h"
 #include "Model/GameConfig.h"
@@ -79,6 +80,8 @@ std::unique_ptr<TextureReader> TextureLoader::createTextureReader(
     return std::make_unique<Quake3ShaderTextureReader>(nameStrategy, gameFS, logger);
   } else if (textureConfig.format.format == "m8") {
     return std::make_unique<M8TextureReader>(nameStrategy, gameFS, logger);
+  } else if (textureConfig.format.format == "vmt") {
+    return std::make_unique<VmtTextureReader>(nameStrategy, gameFS, logger);
   } else {
     throw GameException("Unknown texture format '" + textureConfig.format.format + "'");
   }
@@ -110,9 +113,11 @@ std::unique_ptr<TextureCollectionLoader> TextureLoader::createTextureCollectionL
         return std::make_unique<FileTextureCollectionLoader>(
           logger, fileSearchPaths, textureConfig.excludes);
       },
-      [&](const Model::TextureDirectoryPackageConfig&) -> std::unique_ptr<TextureCollectionLoader> {
+      [&](const Model::TextureDirectoryPackageConfig& config)
+        -> std::unique_ptr<TextureCollectionLoader> {
+        const bool recursiveSearch = config.singleCollection;
         return std::make_unique<DirectoryTextureCollectionLoader>(
-          logger, gameFS, textureConfig.excludes);
+          logger, gameFS, textureConfig.excludes, recursiveSearch);
       }),
     textureConfig.package);
 }

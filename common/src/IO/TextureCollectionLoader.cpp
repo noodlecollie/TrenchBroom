@@ -80,14 +80,19 @@ Assets::TextureCollection FileTextureCollectionLoader::loadTextureCollection(
 }
 
 DirectoryTextureCollectionLoader::DirectoryTextureCollectionLoader(
-  Logger& logger, const FileSystem& gameFS, const std::vector<std::string>& exclusions)
+  Logger& logger, const FileSystem& gameFS, const std::vector<std::string>& exclusions,
+  bool forceRecursiveSearch)
   : TextureCollectionLoader(logger, exclusions)
-  , m_gameFS(gameFS) {}
+  , m_gameFS(gameFS)
+  , m_forceRecursiveSearch(forceRecursiveSearch) {}
 
 Assets::TextureCollection DirectoryTextureCollectionLoader::loadTextureCollection(
   const Path& path, const std::vector<std::string>& textureExtensions,
   const TextureReader& textureReader) {
-  const auto texturePaths = m_gameFS.findItems(path, FileExtensionMatcher(textureExtensions));
+  const auto texturePaths =
+    m_forceRecursiveSearch
+      ? m_gameFS.findItemsRecursively(path, FileExtensionMatcher(textureExtensions))
+      : m_gameFS.findItems(path, FileExtensionMatcher(textureExtensions));
   auto textures = std::vector<Assets::Texture>();
   textures.reserve(texturePaths.size());
 
@@ -101,7 +106,10 @@ Assets::TextureCollection DirectoryTextureCollectionLoader::loadTextureCollectio
         absolutePath = m_gameFS.makeAbsolute(texturePath);
       } catch (const FileSystemException& e) { m_logger.debug() << e.what(); }
 
-      const auto name = file->path().lastComponent().deleteExtension().asString();
+      const auto name = m_forceRecursiveSearch
+                          ? file->path().deleteExtension().asString("/")
+                          : file->path().lastComponent().deleteExtension().asString("/");
+
       if (shouldExclude(name)) {
         continue;
       }

@@ -69,14 +69,16 @@ struct TextureFilePackageConfig {
 
 struct TextureDirectoryPackageConfig {
   IO::Path rootDirectory;
+  bool singleCollection;
 
-  kdl_reflect_decl(TextureDirectoryPackageConfig, rootDirectory);
+  kdl_reflect_decl(TextureDirectoryPackageConfig, rootDirectory, singleCollection);
 };
 
 using TexturePackageConfig = std::variant<TextureFilePackageConfig, TextureDirectoryPackageConfig>;
 std::ostream& operator<<(std::ostream& str, const TexturePackageConfig& config);
 
 IO::Path getRootDirectory(const TexturePackageConfig& texturePackageConfig);
+bool isRootDirectoryASingleTextureCollection(const TexturePackageConfig& texturePackageConfig);
 
 struct TextureConfig {
   TexturePackageConfig package;
