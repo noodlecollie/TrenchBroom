@@ -167,7 +167,7 @@ Model::TexturePackageConfig GameConfigParser::parseTexturePackageConfig(
   expectStructure(
     value, "["
            "{'type': 'String'},"
-           "{'root': 'String', 'format': 'Map', 'singleCollection': 'Boolean'}"
+           "{'root': 'String', 'format': 'Map', 'singlecollection': 'Boolean'}"
            "]");
 
   const std::string typeStr = value["type"].stringValue();
@@ -178,9 +178,9 @@ Model::TexturePackageConfig GameConfigParser::parseTexturePackageConfig(
     expectMapEntry(value, "root", EL::ValueType::String);
 
     bool singleCollection = false;
-    if (value.contains("singleCollection")) {
-      expectMapEntry(value, "singleCollection", EL::ValueType::Boolean);
-      singleCollection = value["singleCollection"].booleanValue();
+    if (value.contains("singlecollection")) {
+      expectMapEntry(value, "singlecollection", EL::ValueType::Boolean);
+      singleCollection = value["singlecollection"].booleanValue();
     }
 
     return Model::TextureDirectoryPackageConfig{
@@ -199,10 +199,17 @@ Model::EntityConfig GameConfigParser::parseEntityConfig(const EL::Value& value) 
     "{'scale': '*'}" // scale is an expression
     "]");
 
+  std::vector<std::string> ignoredDefinitionClasses;
+
+  if (value.contains("ignoreddefinitionclasses")) {
+    expectMapEntry(value, "ignoreddefinitionclasses", EL::ValueType::Array);
+    ignoredDefinitionClasses = value["ignoreddefinitionclasses"].asStringSet();
+  }
+
   return Model::EntityConfig{
     Path::asPaths(value["definitions"].asStringList()), value["modelformats"].asStringSet(),
     Color::parse(value["defaultcolor"].stringValue()).value_or(Color()),
-    value["scale"].expression()};
+    std::move(ignoredDefinitionClasses), value["scale"].expression()};
 }
 
 Model::FaceAttribsConfig GameConfigParser::parseFaceAttribsConfig(const EL::Value& value) const {

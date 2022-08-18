@@ -407,11 +407,12 @@ std::vector<Assets::EntityDefinition*> GameImpl::doLoadEntityDefinitions(
   IO::ParserStatus& status, const IO::Path& path) const {
   const auto extension = path.extension();
   const auto& defaultColor = m_config.entityConfig.defaultColor;
+  const auto& ignoredDefinitionClasses = m_config.entityConfig.ignoredDefinitionClasses;
 
   if (kdl::ci::str_is_equal("fgd", extension)) {
     auto file = IO::Disk::openFile(IO::Disk::fixPath(path));
     auto reader = file->reader().buffer();
-    IO::FgdParser parser(reader.stringView(), defaultColor, file->path());
+    IO::FgdParser parser(reader.stringView(), defaultColor, file->path(), ignoredDefinitionClasses);
     return parser.parseDefinitions(status);
   } else if (kdl::ci::str_is_equal("def", extension)) {
     auto file = IO::Disk::openFile(IO::Disk::fixPath(path));

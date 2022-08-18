@@ -128,9 +128,12 @@ FgdTokenizer::Token FgdTokenizer::emitToken() {
   return Token(FgdToken::Eof, nullptr, nullptr, length(), line(), column());
 }
 
-FgdParser::FgdParser(std::string_view str, const Color& defaultEntityColor, const Path& path)
+FgdParser::FgdParser(
+  std::string_view str, const Color& defaultEntityColor, const Path& path,
+  const std::vector<std::string>& ignoredDefinitionClasses)
   : EntityDefinitionParser(defaultEntityColor)
-  , m_tokenizer(FgdTokenizer(std::move(str))) {
+  , m_tokenizer(FgdTokenizer(std::move(str)))
+  , m_ignoredDefinitionClasses(ignoredDefinitionClasses) {
   if (!path.isEmpty() && path.isAbsolute()) {
     m_fs = std::make_shared<DiskFileSystem>(path.deleteLastComponent());
     pushIncludePath(path.lastComponent());
@@ -242,6 +245,21 @@ std::optional<EntityDefinitionClassInfo> FgdParser::parseClassInfo(ParserStatus&
   } else if (kdl::ci::str_is_equal(classname, "@Main")) {
     skipMainClass(status);
     return std::nullopt;
+  } else if (
+    kdl::ci::str_is_equal(classname, "@FilterClass") ||
+    kdl::ci::str_is_equal(classname, "@KeyFrameClass") ||
+    kdl::ci::str_is_equal(classname, "@MoveClass")) {
+    // TODO: Handle this in a better way? Perhaps we need a newer
+    // FGD parser class that augments the existing parser.
+
+    status.warn(
+      token.line(), token.column(),
+      "'" + classname + "' is currently unsupported, treating as @PointClass");
+
+    return parsePointClassInfo(status);
+  } else if (isClassnameIgnored(classname)) {
+    skipIgnoredDefinitionClass(status);
+    return std::nullopt;
   } else {
     const auto msg = "Unknown entity definition class '" + classname + "'";
     status.error(token.line(), token.column(), msg);
@@ -336,6 +354,49 @@ void FgdParser::skipMainClass(ParserStatus& status) {
   } while (token.type() != FgdToken::CBracket);
 }
 
+bool FgdParser::isClassnameIgnored(const std::string& classname) const {
+  return std::find_if(
+           m_ignoredDefinitionClasses.begin(), m_ignoredDefinitionClasses.end(),
+           [&classname](const std::string& val) {
+             return kdl::ci::str_is_equal(classname, val);
+           }) != m_ignoredDefinitionClasses.end();
+}
+
+void FgdParser::skipIgnoredDefinitionClass(ParserStatus& status) {
+  expect(
+    status, FgdToken::OBracket | FgdToken::OParenthesis | FgdToken::Equality,
+    m_tokenizer.peekToken());
+
+  if (m_tokenizer.peekToken().type() == FgdToken::Equality) {
+    // Form: @class = "name" [ ... ]
+    // Skip the name to get to the brackets
+    expect(status, FgdToken::Equality, m_tokenizer.nextToken());
+    expect(status, FgdToken::String, m_tokenizer.nextToken());
+  }
+
+  if (m_tokenizer.peekToken().type() == FgdToken::OBracket) {
+    skipIgnoredDefinitionClassDeep(status);
+  } else {
+    skipClassProperty(status);
+  }
+}
+
+void FgdParser::skipIgnoredDefinitionClassDeep(ParserStatus& status) {
+  expect(status, FgdToken::OBracket, m_tokenizer.nextToken());
+  size_t depth = 1;
+
+  do {
+    const Token token = m_tokenizer.nextToken();
+    expect(status, ~FgdToken::Eof, token);
+
+    if (token.type() == FgdToken::OBracket) {
+      ++depth;
+    } else if (token.type() == FgdToken::CBracket) {
+      --depth;
+    }
+  } while (depth > 0);
+}
+
 std::vector<std::string> FgdParser::parseSuperClasses(ParserStatus& status) {
   expect(status, FgdToken::OParenthesis, m_tokenizer.nextToken());
 
@@ -395,6 +456,13 @@ Assets::ModelDefinition FgdParser::parseModel(ParserStatus& status) {
 }
 
 void FgdParser::skipClassProperty(ParserStatus& /* status */) {
+  // We have already consumed the property name.
+  // If the next token is not a parenthesis, it forms
+  // part of the next property (which we should not skip).
+  if (m_tokenizer.peekToken().type() != FgdToken::OParenthesis) {
+    return;
+  }
+
   size_t depth = 0;
   Token token;
   do {
@@ -414,9 +482,22 @@ FgdParser::PropertyDefinitionList FgdParser::parsePropertyDefinitions(ParserStat
   auto token = expect(status, FgdToken::Word | FgdToken::CBracket, m_tokenizer.nextToken());
 
   while (token.type() != FgdToken::CBracket) {
-    const auto propertyKey = token.data();
+    auto propertyKey = token.data();
     const auto line = token.line();
     const auto column = token.column();
+    const bool wasInputOrOutput =
+      kdl::ci::str_is_equal(propertyKey, "input") || kdl::ci::str_is_equal(propertyKey, "output");
+
+    if (wasInputOrOutput) {
+      const Token ioNameToken = m_tokenizer.peekToken();
+      const std::string ioName = ioNameToken.type() == FgdToken::Word ? ioNameToken.data() : "";
+
+      status.debug(
+        token.line(), token.column(),
+        "Encountered " + propertyKey + " '" + ioName + "' which is not yet supported, skipping");
+
+      propertyKey = expect(status, FgdToken::Word, m_tokenizer.nextToken()).data();
+    }
 
     expect(status, FgdToken::OParenthesis, m_tokenizer.nextToken());
     token = expect(status, FgdToken::Word, m_tokenizer.nextToken());
@@ -439,6 +520,8 @@ FgdParser::PropertyDefinitionList FgdParser::parsePropertyDefinitions(ParserStat
       propertyDefinition = parseChoicesPropertyDefinition(status, propertyKey);
     } else if (kdl::ci::str_is_equal(typeName, "flags")) {
       propertyDefinition = parseFlagsPropertyDefinition(status, propertyKey);
+    } else if (wasInputOrOutput) {
+      propertyDefinition = parseUnknownPropertyDefinition(status, propertyKey);
     } else {
       status.debug(
         token.line(), token.column(),

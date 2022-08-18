@@ -11,6 +11,7 @@ As per [here](https://github.com/TrenchBroom/TrenchBroom/issues/4072), these cha
 * Add support for reading VPKs and VMT/VTF files for textures.
 	* Again, done in a limited way for the first pass.
 * Add support for reading TF2 FGD. If there's fancy stuff in there (eg. entity I/O), just ignore it for now.
+	* This is done, and entities are recognised correctly.
 * Add support for exporting MAP to VMF. Unclear whether this would be better implemented as an external utility or an internal routine.
 
 ### VPK Support

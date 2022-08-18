@@ -95,6 +95,7 @@ struct EntityConfig {
   std::vector<IO::Path> defFilePaths;
   std::vector<std::string> modelFormats;
   Color defaultColor;
+  std::vector<std::string> ignoredDefinitionClasses;
   std::optional<EL::Expression> scaleExpression;
 
   kdl_reflect_decl(EntityConfig, defFilePaths, modelFormats, defaultColor, scaleExpression);

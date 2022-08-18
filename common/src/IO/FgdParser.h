@@ -76,9 +76,12 @@ private:
   std::shared_ptr<FileSystem> m_fs;
 
   FgdTokenizer m_tokenizer;
+  std::vector<std::string> m_ignoredDefinitionClasses;
 
 public:
-  FgdParser(std::string_view str, const Color& defaultEntityColor, const Path& path);
+  FgdParser(
+    std::string_view str, const Color& defaultEntityColor, const Path& path,
+    const std::vector<std::string>& ignoredDefinitionClasses = std::vector<std::string>());
   FgdParser(std::string_view str, const Color& defaultEntityColor);
 
 private:
@@ -104,6 +107,10 @@ private:
   EntityDefinitionClassInfo parseClassInfo(
     ParserStatus& status, EntityDefinitionClassType classType);
   void skipMainClass(ParserStatus& status);
+
+  bool isClassnameIgnored(const std::string& classname) const;
+  void skipIgnoredDefinitionClass(ParserStatus& status);
+  void skipIgnoredDefinitionClassDeep(ParserStatus& status);
 
   std::vector<std::string> parseSuperClasses(ParserStatus& status);
   Assets::ModelDefinition parseModel(ParserStatus& status);
