@@ -359,7 +359,7 @@ Assets::TextureBuffer decompressDXT1(const void* in, size_t inLength, size_t wid
     }
   }
 
-  return std::move(textureBuffer);
+  return textureBuffer;
 }
 
 Assets::TextureBuffer decompressDXT3(const void* in, size_t inLength, size_t width, size_t height) {
@@ -446,7 +446,7 @@ Assets::TextureBuffer decompressDXT3(const void* in, size_t inLength, size_t wid
     }
   }
 
-  return std::move(textureBuffer);
+  return textureBuffer;
 }
 
 Assets::TextureBuffer decompressDXT5(const void* in, size_t inLength, size_t width, size_t height) {
@@ -576,7 +576,7 @@ Assets::TextureBuffer decompressDXT5(const void* in, size_t inLength, size_t wid
     }
   }
 
-  return std::move(textureBuffer);
+  return textureBuffer;
 }
 } // namespace Vtf
 } // namespace IO

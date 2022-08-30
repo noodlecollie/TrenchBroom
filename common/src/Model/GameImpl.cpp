@@ -22,6 +22,7 @@
 #include "Assets/EntityDefinitionFileSpec.h"
 #include "Assets/EntityModel.h"
 #include "Assets/Palette.h"
+#include "Assets/TextureManager.h"
 #include "Ensure.h"
 #include "Exceptions.h"
 #include "IO/AseParser.h"
@@ -219,6 +220,7 @@ void GameImpl::doWriteMap(WorldNode& world, const IO::Path& path, const bool exp
 
   IO::NodeWriter writer(world, file);
   writer.setExporting(exporting);
+  writer.setEmptyTextureMapping(m_config.textureConfig.emptyTexture);
   writer.writeMap();
 }
 
@@ -245,6 +247,7 @@ void GameImpl::doExportMap(WorldNode& world, const IO::ExportOptions& options) c
           world,
           std::make_unique<IO::ObjSerializer>(objFile, mtlFile, mtlPath.filename(), objOptions)};
         writer.setExporting(true);
+        writer.setEmptyTextureMapping(m_config.textureConfig.emptyTexture);
         writer.writeMap();
       },
       [&](const IO::MapExportOptions& mapOptions) {
@@ -271,12 +274,14 @@ std::vector<BrushFace> GameImpl::doParseBrushFaces(
 void GameImpl::doWriteNodesToStream(
   WorldNode& world, const std::vector<Node*>& nodes, std::ostream& stream) const {
   IO::NodeWriter writer(world, stream);
+  writer.setEmptyTextureMapping(m_config.textureConfig.emptyTexture);
   writer.writeNodes(nodes);
 }
 
 void GameImpl::doWriteBrushFacesToStream(
   WorldNode& world, const std::vector<BrushFace>& faces, std::ostream& stream) const {
   IO::NodeWriter writer(world, stream);
+  writer.setEmptyTextureMapping(m_config.textureConfig.emptyTexture);
   writer.writeBrushFaces(faces);
 }
 

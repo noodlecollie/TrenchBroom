@@ -13,6 +13,7 @@ As per [here](https://github.com/TrenchBroom/TrenchBroom/issues/4072), these cha
 * Add support for reading TF2 FGD. If there's fancy stuff in there (eg. entity I/O), just ignore it for now.
 	* This is done, and entities are recognised correctly.
 * Add support for exporting MAP to VMF. Unclear whether this would be better implemented as an external utility or an internal routine.
+	* This is done.
 
 ### VPK Support
 
@@ -31,10 +32,17 @@ Potentially useful libraries for reading assets:
 * Should MAP2VMF be written as an external utility, or written into TB?
 	* I'm leaning towards writing it into the editor, in the same way that "export to .obj" is done.
 
+### End-to-End Test
+
+* Create a basic map that functions in TF2 without entity I/O: two spawn rooms with resupply lockers, fighting arena, lights, skybox.
+* Compile this map using TrenchBroom compiler configuration on Windows.
+* Test map in game.
+
 ## V1
 
 * Add support for reading MDL files for models.
 * Add support for entity I/O.
+* Add support for compiling maps on non-Windows platforms.
 
 ### MDLs
 
@@ -57,6 +65,20 @@ _tb_source_io_1 "..."
 ```
 
 This would at least allow us to specify I/O without needing a specific UI.
+
+### Compiling Maps
+
+Compiling maps is a bit of a difficult one, since the official map compilers only work on Windows. As far as I see we have a few options:
+
+1. Run the TF2 map compilers through Wine (or similar) on Linux.
+	This repo, which puts the TF2 map compilers into a Docker container, may help: https://github.com/re1ard/linux_map_compiler
+
+2. Re-write the map compilers to run on Linux.
+	Although a noble task, this would be a huge undertaking, and would probably require many tweaks to support many different Source games.
+
+3. Recompile the existing map compilers (eg. from the leaked source code) with Linux support.
+	Unclear exactly what would be required for Linux support. However, if the leaked source code already has Linux support for games, then porting the compile tools to linux _might_ not bee too hard?
+	Code: https://github.com/OthmanAba/TeamFortress2/tree/1b81dded673d49adebf4d0958e52236ecc28a956/tf2_src/utils/vbsp
 
 ## V2
 

@@ -65,7 +65,11 @@ enum class MapFormat {
   /**
    * Quake 3 with brush primitives, also allows Quake 2 brushes
    */
-  Quake3
+  Quake3,
+  /**
+   * Source VMF file format.
+   */
+  SourceVmf
 };
 
 /**
@@ -93,5 +97,6 @@ std::string formatName(MapFormat format);
  */
 std::vector<MapFormat> compatibleFormats(MapFormat format);
 bool isParallelTexCoordSystem(MapFormat format);
+std::string mapFileExtension(MapFormat format);
 } // namespace Model
 } // namespace TrenchBroom

@@ -85,6 +85,7 @@ struct TextureConfig {
   PackageFormatConfig format;
   IO::Path palette;
   std::string property;
+  std::string emptyTexture;
   IO::Path shaderSearchPath;
   std::vector<std::string> excludes; // Glob patterns used to match texture names for exclusion
 

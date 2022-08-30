@@ -44,6 +44,8 @@ MapFormat formatFromName(const std::string& formatName) {
     return MapFormat::Quake3_Valve;
   } else if (formatName == "Quake3") {
     return MapFormat::Quake3;
+  } else if (formatName == "SourceVmf") {
+    return MapFormat::SourceVmf;
   } else {
     return MapFormat::Unknown;
   }
@@ -69,6 +71,8 @@ std::string formatName(const MapFormat format) {
       return "Quake3 (Valve)";
     case MapFormat::Quake3:
       return "Quake3";
+    case MapFormat::SourceVmf:
+      return "SourceVmf";
     case MapFormat::Unknown:
       return "Unknown";
       switchDefault();
@@ -95,6 +99,8 @@ std::vector<MapFormat> compatibleFormats(const MapFormat format) {
       return {MapFormat::Quake3_Valve, MapFormat::Quake3, MapFormat::Quake3_Legacy};
     case MapFormat::Quake3:
       return {MapFormat::Quake3, MapFormat::Quake3_Valve, MapFormat::Quake3_Legacy};
+    case MapFormat::SourceVmf:
+      return {MapFormat::SourceVmf};
     case MapFormat::Unknown:
       return {MapFormat::Unknown};
       switchDefault();
@@ -106,6 +112,7 @@ bool isParallelTexCoordSystem(const MapFormat format) {
     case MapFormat::Valve:
     case MapFormat::Quake2_Valve:
     case MapFormat::Quake3_Valve:
+    case MapFormat::SourceVmf:
       return true;
     case MapFormat::Standard:
     case MapFormat::Quake2:
@@ -116,6 +123,24 @@ bool isParallelTexCoordSystem(const MapFormat format) {
     case MapFormat::Unknown:
       return false;
       switchDefault();
+  }
+}
+
+std::string mapFileExtension(MapFormat format) {
+  switch (format) {
+    case MapFormat::SourceVmf:
+      return "vmf";
+    case MapFormat::Valve:
+    case MapFormat::Quake2_Valve:
+    case MapFormat::Quake3_Valve:
+    case MapFormat::Standard:
+    case MapFormat::Quake2:
+    case MapFormat::Hexen2:
+    case MapFormat::Daikatana:
+    case MapFormat::Quake3_Legacy:
+    case MapFormat::Quake3:
+    case MapFormat::Unknown:
+      return "map";
   }
 }
 } // namespace Model

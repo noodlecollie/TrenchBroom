@@ -91,6 +91,10 @@ void NodeWriter::setExporting(const bool exporting) {
   m_serializer->setExporting(exporting);
 }
 
+void NodeWriter::setEmptyTextureMapping(const std::string& textureName) {
+  m_serializer->setEmptyTextureMapping(textureName);
+}
+
 void NodeWriter::writeMap() {
   m_serializer->beginFile({&m_world});
   writeDefaultLayer();

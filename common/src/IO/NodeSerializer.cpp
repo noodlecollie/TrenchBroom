@@ -43,7 +43,8 @@ namespace IO {
 NodeSerializer::NodeSerializer()
   : m_entityNo(0)
   , m_brushNo(0)
-  , m_exporting(false) {}
+  , m_exporting(false)
+  , m_emptyTextureMapping(Model::BrushFaceAttributes::NoTextureName) {}
 
 NodeSerializer::~NodeSerializer() = default;
 
@@ -61,6 +62,14 @@ bool NodeSerializer::exporting() const {
 
 void NodeSerializer::setExporting(const bool exporting) {
   m_exporting = exporting;
+}
+
+const std::string& NodeSerializer::getEmptyTextureMapping() const {
+  return m_emptyTextureMapping;
+}
+
+void NodeSerializer::setEmptyTextureMapping(const std::string& textureName) {
+  m_emptyTextureMapping = textureName;
 }
 
 void NodeSerializer::beginFile(const std::vector<const Model::Node*>& rootNodes) {

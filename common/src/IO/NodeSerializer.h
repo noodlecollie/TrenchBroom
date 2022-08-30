@@ -62,6 +62,7 @@ private:
   ObjectNo m_brushNo;
 
   bool m_exporting;
+  std::string m_emptyTextureMapping;
 
 public:
   NodeSerializer();
@@ -74,6 +75,9 @@ protected:
 public:
   bool exporting() const;
   void setExporting(bool exporting);
+
+  const std::string& getEmptyTextureMapping() const;
+  void setEmptyTextureMapping(const std::string& textureName);
 
 public:
   /**

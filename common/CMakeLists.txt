@@ -90,6 +90,9 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/IO/TextureCollectionLoader.cpp
         ${COMMON_SOURCE_DIR}/IO/TextureLoader.cpp
         ${COMMON_SOURCE_DIR}/IO/TextureReader.cpp
+        ${COMMON_SOURCE_DIR}/IO/ValveKeyValuesTree.cpp
+        ${COMMON_SOURCE_DIR}/IO/ValveKeyValuesWriter.cpp
+        ${COMMON_SOURCE_DIR}/IO/VmfFileSerializer.cpp
         ${COMMON_SOURCE_DIR}/IO/VmtTextureReader.cpp
         ${COMMON_SOURCE_DIR}/IO/VpkFileSystem.cpp
         ${COMMON_SOURCE_DIR}/IO/VpkUtils.cpp
@@ -582,6 +585,10 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/IO/TextureReader.h
         ${COMMON_SOURCE_DIR}/IO/Token.h
         ${COMMON_SOURCE_DIR}/IO/Tokenizer.h
+        ${COMMON_SOURCE_DIR}/IO/ValveKeyValuesTree.h
+        ${COMMON_SOURCE_DIR}/IO/ValveKeyValuesWriter.h
+        ${COMMON_SOURCE_DIR}/IO/ValveKeyValuesWriterUtils.h
+        ${COMMON_SOURCE_DIR}/IO/VmfFileSerializer.h
         ${COMMON_SOURCE_DIR}/IO/VmtTextureReader.h
         ${COMMON_SOURCE_DIR}/IO/VpkFileSystem.h
         ${COMMON_SOURCE_DIR}/IO/VpkUtils.h

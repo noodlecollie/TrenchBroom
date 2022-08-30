@@ -17,8 +17,6 @@
  along with TrenchBroom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 #include "IO/VtfDefs.h"
 
 namespace TrenchBroom {

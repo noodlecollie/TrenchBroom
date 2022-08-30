@@ -31,6 +31,7 @@
 #include "Model/LayerNode.h"
 #include "Model/PatchNode.h"
 #include "Model/WorldNode.h"
+#include "VmfFileSerializer.h"
 
 #include <kdl/overload.h>
 #include <kdl/parallel.h>
@@ -230,6 +231,8 @@ std::unique_ptr<NodeSerializer> MapFileSerializer::create(
       return std::make_unique<ValveFileSerializer>(stream);
     case Model::MapFormat::Hexen2:
       return std::make_unique<Hexen2FileSerializer>(stream);
+    case Model::MapFormat::SourceVmf:
+      return std::make_unique<VmfFileSerializer>(stream);
     case Model::MapFormat::Unknown:
       throw FileFormatException("Unknown map file format");
       switchDefault();

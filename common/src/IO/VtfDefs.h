@@ -163,9 +163,9 @@ struct Header_70 : public HeaderBase {
   float reflectivity[3];      // Reflectivity vector
   uint8_t padding1[4];        // Reflectivity padding (8 byte packing)
   float bumpScale;            // Bump map scale
-  uint32_t imageFormat;       // Image format index
+  int32_t imageFormat;        // Image format index
   uint8_t mipCount;           // Number of MIP levels (including the largest image)
-  uint32_t lowResImageFormat; // Image format of the thumbnail image
+  int32_t lowResImageFormat;  // Image format of the thumbnail image
   uint8_t lowResImageWidth;   // Thumbnail image width
   uint8_t lowResImageHeight;  // Thumbnail image height
 };

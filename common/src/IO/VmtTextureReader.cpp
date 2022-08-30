@@ -27,6 +27,7 @@
 #include "IO/VtfUtils.h"
 #include "Logger.h"
 #include <cstdint>
+#include <cstring>
 
 namespace TrenchBroom {
 namespace IO {
@@ -64,7 +65,7 @@ static std::string getBaseTextureFromKeyValues(Reader& reader) {
     std::vector<char>::const_iterator valueBegin = baseTextureKey + sizeof(BASETEXTURE_KEY) - 1;
     const bool keyEndWasValid = *valueBegin == '"' || *valueBegin == ' ' || *valueBegin == '\t';
 
-    if (*valueBegin != '"' && *valueBegin != ' ' && *valueBegin != '\t') {
+    if (!keyEndWasValid) {
       offset = valueBegin - buffer.begin();
       continue;
     }

@@ -50,6 +50,7 @@ public:
   ~NodeWriter();
 
   void setExporting(bool exporting);
+  void setEmptyTextureMapping(const std::string& textureName);
   void writeMap();
 
 private:

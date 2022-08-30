@@ -19,6 +19,7 @@
 
 #include "GameConfigParser.h"
 
+#include "Assets/Texture.h"
 #include "EL/EvaluationContext.h"
 #include "EL/Expression.h"
 #include "EL/Expressions.h"
@@ -156,10 +157,19 @@ Model::TextureConfig GameConfigParser::parseTextureConfig(const EL::Value& value
            "'Array'}"
            "]");
 
+  std::string emptyTexture = Model::BrushFaceAttributes::NoTextureName;
+  if (value.contains("emptytexture")) {
+    emptyTexture = value["emptytexture"].stringValue();
+  }
+
   return Model::TextureConfig{
-    parseTexturePackageConfig(value["package"]),   parsePackageFormatConfig(value["format"]),
-    Path{value["palette"].stringValue()},          value["attribute"].stringValue(),
-    Path{value["shaderSearchPath"].stringValue()}, value["excludes"].asStringList()};
+    parseTexturePackageConfig(value["package"]),
+    parsePackageFormatConfig(value["format"]),
+    Path{value["palette"].stringValue()},
+    value["attribute"].stringValue(),
+    emptyTexture,
+    Path{value["shaderSearchPath"].stringValue()},
+    value["excludes"].asStringList()};
 }
 
 Model::TexturePackageConfig GameConfigParser::parseTexturePackageConfig(
