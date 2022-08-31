@@ -362,6 +362,7 @@ void StandardMapParser::parseFace(ParserStatus& status, const bool primitive) {
       parseDaikatanaFace(status);
       break;
     case Model::MapFormat::Valve:
+    case Model::MapFormat::Source:
       parseValveFace(status);
       break;
     case Model::MapFormat::Quake3:

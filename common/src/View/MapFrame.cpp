@@ -891,11 +891,9 @@ bool MapFrame::saveDocumentAs() {
     const IO::Path& originalPath = m_document->path();
     const IO::Path directory = originalPath.deleteLastComponent();
     const IO::Path fileName = originalPath.lastComponent();
-    const std::string fileExtension = Model::mapFileExtension(m_document->world()->mapFormat());
 
     const QString newFileName = QFileDialog::getSaveFileName(
-      this, tr("Save map file"), IO::pathAsQString(originalPath),
-      QString::fromStdString("Map files (*." + fileExtension + ")"));
+      this, tr("Save map file"), IO::pathAsQString(originalPath), "Map files (*.map)");
     if (newFileName.isEmpty()) {
       return false;
     }
@@ -946,11 +944,19 @@ bool MapFrame::exportDocumentAsObj() {
 
 bool MapFrame::exportDocumentAsMap() {
   const IO::Path& originalPath = m_document->path();
-  const std::string fileExtension = Model::mapFileExtension(m_document->world()->mapFormat());
+
+  Model::MapExportFormat exFmt = Model::mapExportFormat();
+
+  if (m_document->world()) {
+    exFmt = Model::mapExportFormat(m_document->world()->mapFormat());
+  }
+
+  const QString fileFilter = QString("%1 (*.%2)")
+                               .arg(QString::fromStdString(exFmt.readableName))
+                               .arg(QString::fromStdString(exFmt.extension));
 
   const QString newFileName = QFileDialog::getSaveFileName(
-    this, tr("Export Map file"), IO::pathAsQString(originalPath),
-    QString::fromStdString("Map files (*." + fileExtension + ")"));
+    this, tr("Export Map file"), IO::pathAsQString(originalPath), fileFilter);
   if (newFileName.isEmpty()) {
     return false;
   }

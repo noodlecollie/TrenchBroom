@@ -12,8 +12,8 @@ As per [here](https://github.com/TrenchBroom/TrenchBroom/issues/4072), these cha
 	* Again, done in a limited way for the first pass.
 * Add support for reading TF2 FGD. If there's fancy stuff in there (eg. entity I/O), just ignore it for now.
 	* This is done, and entities are recognised correctly.
-* Add support for exporting MAP to VMF. Unclear whether this would be better implemented as an external utility or an internal routine.
-	* This is done.
+* Add support for exporting MAP to VMF.
+	* This is done. Maps are saved normally using the Valve map format (which we may need to augment in future), and are saved as a VMF when exporting.
 
 ### VPK Support
 
@@ -31,6 +31,7 @@ Potentially useful libraries for reading assets:
 * Can the TF2 FGD be loaded as-is, or does TB fall over? If the syntax is supported as-is, that makes our life easier.
 * Should MAP2VMF be written as an external utility, or written into TB?
 	* I'm leaning towards writing it into the editor, in the same way that "export to .obj" is done.
+	* Coming back to this, TrenchBroom map reading and writing is done in a kind of stupid way: there are many specialised writer classes, but one monolithic reader class that expects all maps it reads to follow a similar token format. This makes it very difficult to implement something that reads VMF files. I think VMF serialisation should be strictly limited to exporting, and saving the map normally should save it in a .map format (which we can augment to include the fancy Source stuff). That way, we don't have to worry about reading VMF files at all.
 
 ### End-to-End Test
 
@@ -100,3 +101,5 @@ Fancier brush types, and moving along face normals and in 3D space, could be add
 * Rendering of particle systems.
 * Easier texture/model/sound browsing.
 * Viewing collision models.
+* Translate TrenchBroom layers/groups to Hammer visgroups.
+* Add support for importing from VMF.

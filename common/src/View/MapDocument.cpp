@@ -336,10 +336,6 @@ static bool applyAndSwap(
 const vm::bbox3 MapDocument::DefaultWorldBounds(-32768.0, 32768.0);
 const std::string MapDocument::DefaultDocumentName("unnamed.map");
 
-static std::string computeDefaultDocumentName(Model::MapFormat format) {
-  return "unnamed." + Model::mapFileExtension(format);
-}
-
 MapDocument::MapDocument()
   : m_worldBounds(DefaultWorldBounds)
   , m_world(nullptr)
@@ -3562,7 +3558,7 @@ void MapDocument::createWorld(
   performSetCurrentLayer(m_world->defaultLayer());
 
   updateGameSearchPaths();
-  setPath(IO::Path(computeDefaultDocumentName(mapFormat)));
+  setPath(IO::Path(DefaultDocumentName));
 }
 
 void MapDocument::loadWorld(

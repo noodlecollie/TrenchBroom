@@ -80,9 +80,13 @@ protected:
   }
 
   void writeTextureInfo(std::ostream& stream, const Model::BrushFace& face) const {
-    const std::string& textureName = face.attributes().textureName().empty()
-                                       ? Model::BrushFaceAttributes::NoTextureName
-                                       : face.attributes().textureName();
+    std::string textureName = face.attributes().textureName().empty()
+                                ? Model::BrushFaceAttributes::NoTextureName
+                                : face.attributes().textureName();
+
+    if (textureName == Model::BrushFaceAttributes::NoTextureName) {
+      textureName = getEmptyTextureMapping();
+    }
 
     fmt::format_to(
       std::ostreambuf_iterator<char>(stream), " {} {} {} {} {} {}",
@@ -92,9 +96,14 @@ protected:
   }
 
   void writeValveTextureInfo(std::ostream& stream, const Model::BrushFace& face) const {
-    const std::string& textureName = face.attributes().textureName().empty()
-                                       ? Model::BrushFaceAttributes::NoTextureName
-                                       : face.attributes().textureName();
+    std::string textureName = face.attributes().textureName().empty()
+                                ? Model::BrushFaceAttributes::NoTextureName
+                                : face.attributes().textureName();
+
+    if (textureName == Model::BrushFaceAttributes::NoTextureName) {
+      textureName = getEmptyTextureMapping();
+    }
+
     const vm::vec3 xAxis = face.textureXAxis();
     const vm::vec3 yAxis = face.textureYAxis();
 
@@ -213,7 +222,7 @@ private:
 };
 
 std::unique_ptr<NodeSerializer> MapFileSerializer::create(
-  const Model::MapFormat format, std::ostream& stream) {
+  const Model::MapFormat format, std::ostream& stream, bool isExporting) {
   switch (format) {
     case Model::MapFormat::Standard:
       return std::make_unique<QuakeFileSerializer>(stream);
@@ -231,8 +240,12 @@ std::unique_ptr<NodeSerializer> MapFileSerializer::create(
       return std::make_unique<ValveFileSerializer>(stream);
     case Model::MapFormat::Hexen2:
       return std::make_unique<Hexen2FileSerializer>(stream);
-    case Model::MapFormat::SourceVmf:
-      return std::make_unique<VmfFileSerializer>(stream);
+    case Model::MapFormat::Source:
+      if (isExporting) {
+        return std::make_unique<VmfFileSerializer>(stream);
+      } else {
+        return std::make_unique<ValveFileSerializer>(stream);
+      }
     case Model::MapFormat::Unknown:
       throw FileFormatException("Unknown map file format");
       switchDefault();

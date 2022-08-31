@@ -67,9 +67,14 @@ enum class MapFormat {
    */
   Quake3,
   /**
-   * Source VMF file format.
+   * Valve map format augmented for Source features.
    */
-  SourceVmf
+  Source
+};
+
+struct MapExportFormat {
+  std::string readableName;
+  std::string extension; // Without the dot
 };
 
 /**
@@ -97,6 +102,6 @@ std::string formatName(MapFormat format);
  */
 std::vector<MapFormat> compatibleFormats(MapFormat format);
 bool isParallelTexCoordSystem(MapFormat format);
-std::string mapFileExtension(MapFormat format);
+MapExportFormat mapExportFormat(MapFormat format = MapFormat::Unknown);
 } // namespace Model
 } // namespace TrenchBroom

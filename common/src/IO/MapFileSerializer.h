@@ -52,7 +52,8 @@ private:
   std::unordered_map<const Model::Node*, PrecomputedString> m_nodeToPrecomputedString;
 
 public:
-  static std::unique_ptr<NodeSerializer> create(Model::MapFormat format, std::ostream& stream);
+  static std::unique_ptr<NodeSerializer> create(
+    Model::MapFormat format, std::ostream& stream, bool isExporting = false);
 
 protected:
   explicit MapFileSerializer(std::ostream& stream);

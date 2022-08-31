@@ -123,7 +123,7 @@ ValveKeyValuesTree::ValveKeyValuesTree(ValveKeyValuesTree&& other)
   : m_root(std::move(other.m_root)) {
   // Trees should always have a root node, so reset the other tree's root now that we've stolen
   // it.
-  other.m_root.reset(new ValveKeyValuesNode());
+  other.clear();
 }
 
 ValveKeyValuesTree& ValveKeyValuesTree::operator=(ValveKeyValuesTree&& other) {
@@ -131,13 +131,17 @@ ValveKeyValuesTree& ValveKeyValuesTree::operator=(ValveKeyValuesTree&& other) {
 
   // Trees should always have a root node, so reset the other tree's root now that we've stolen
   // it.
-  other.m_root.reset(new ValveKeyValuesNode());
+  other.clear();
 
   return *this;
 }
 
 ValveKeyValuesNode* ValveKeyValuesTree::getRoot() const {
   return m_root.get();
+}
+
+void ValveKeyValuesTree::clear() {
+  m_root.reset(new ValveKeyValuesNode());
 }
 } // namespace IO
 } // namespace TrenchBroom

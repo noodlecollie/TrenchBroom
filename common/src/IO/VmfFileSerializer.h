@@ -46,7 +46,8 @@ private:
 
   struct PrecomputedString {
     std::string string;
-    size_t lineCount;
+    size_t lineCount = 0;
+    bool moveToWorldspawn = false;
   };
 
   struct BrushWithAssignedIDs {
@@ -71,10 +72,14 @@ private:
   void precomputeBrushesAndPatches(const std::vector<const Model::Node*>& rootNodes);
   PrecomputedString writeBrushFaces(const BrushWithAssignedIDs& brush) const;
   size_t writeBrushFace(std::ostream& stream, const Model::BrushFace& face, size_t faceID) const;
+  void writeBrushesMovedToWorldspawn();
+  void writePrecomputedString(const Model::Node* brush, const PrecomputedString& pStr);
 
   std::ostream& m_stream;
   size_t m_line = 1;
   LineStack m_startLineStack;
+  NodeSerializer::ObjectNo m_entityID = 1;
+  bool m_processingGroupOrLayer = false;
 
   std::unordered_map<const Model::Node*, PrecomputedString> m_nodeToPrecomputedString;
 };

@@ -60,6 +60,7 @@ public:
 
 private:
   QWidget* createEditorPage(QWidget* parent);
+  QString getExtensionForMapFormat();
 
 private slots:
   void nameChanged(const QString& text);

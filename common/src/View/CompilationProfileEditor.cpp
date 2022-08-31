@@ -21,13 +21,17 @@
 
 #include "Model/CompilationProfile.h"
 #include "Model/CompilationTask.h"
+#include "Model/MapFormat.h"
+#include "Model/WorldNode.h"
 #include "View/BorderLine.h"
 #include "View/CompilationTaskListBox.h"
 #include "View/CompilationVariables.h"
+#include "View/MapDocument.h"
 #include "View/MultiCompletionLineEdit.h"
 #include "View/QtUtils.h"
 #include "View/VariableStoreModel.h"
 #include "View/ViewConstants.h"
+#include "kdl/string_compare.h"
 
 #include <kdl/memory_utils.h>
 
@@ -37,6 +41,8 @@
 #include <QLineEdit>
 #include <QMenu>
 #include <QStackedWidget>
+#include <qnamespace.h>
+#include <string>
 
 namespace TrenchBroom {
 namespace View {
@@ -158,6 +164,20 @@ QWidget* CompilationProfileEditor::createEditorPage(QWidget* parent) {
   return containerPanel;
 }
 
+QString CompilationProfileEditor::getExtensionForMapFormat() {
+  // Start off with a default.
+  auto exFmt = Model::MapExportFormat();
+
+  auto document = kdl::mem_lock(m_document);
+  auto world = document->world();
+
+  if (world) {
+    exFmt = Model::mapExportFormat(world->mapFormat());
+  }
+
+  return QString::fromStdString(exFmt.extension);
+}
+
 void CompilationProfileEditor::nameChanged(const QString& text) {
   ensure(m_profile != nullptr, "profile is null");
   const auto name = text.toStdString();
@@ -185,8 +205,18 @@ void CompilationProfileEditor::addTask() {
   std::unique_ptr<Model::CompilationTask> task = nullptr;
   auto* chosenAction = menu.exec(QCursor::pos());
   if (chosenAction == exportMapAction) {
+    const QString extension = getExtensionForMapFormat();
+
+    // If wer're exporting a map whose extension will not collide with the existing map file itself,
+    // don't suggest a "-compile" suffix. This is especially salient for Source maps, where
+    // renaming the map's name during or after the compile process can break embedded items like
+    // cubemaps where these are named after the map's file name.
+    const QString suffix =
+      QString::compare(extension, "map", Qt::CaseInsensitive) == 0 ? "-compile" : "";
+
     task = std::make_unique<Model::CompilationExportMap>(
-      true, "${WORK_DIR_PATH}/${MAP_BASE_NAME}-compile.map");
+      true,
+      QString("${WORK_DIR_PATH}/${MAP_BASE_NAME}%1.%2").arg(suffix).arg(extension).toStdString());
   } else if (chosenAction == copyFilesAction) {
     task = std::make_unique<Model::CompilationCopyFiles>(true, "", "");
   } else if (chosenAction == runToolAction) {

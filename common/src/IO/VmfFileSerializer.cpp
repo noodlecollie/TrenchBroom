@@ -28,9 +28,12 @@
 #include "Model/EntityNode.h"
 #include "Model/EntityProperties.h"
 #include "Model/GroupNode.h"
+#include "Model/Layer.h"
 #include "Model/LayerNode.h"
+#include "Model/Node.h"
 #include "Model/PatchNode.h"
 #include "Model/WorldNode.h"
+#include "kdl/string_compare.h"
 
 #include <fmt/format.h>
 #include <iterator> // for std::ostreambuf_iterator
@@ -56,6 +59,44 @@ static inline void addChildFormatted(
   node->addChildWithValue(key, ss.str());
 }
 
+static inline bool isWorldspawn(const Model::Node& node) {
+  return node.name() == Model::EntityPropertyValues::WorldspawnClassname;
+}
+
+static inline bool isGroupOrLayer(const Model::Node* node) {
+  return dynamic_cast<const Model::LayerNode*>(node) || dynamic_cast<const Model::GroupNode*>(node);
+}
+
+// If a world brush is part of a layer or group, TrenchBroom makes it appear as if it is part of a
+// func_group entity. This messes with how the vbsp will compile the map, so we want to move all of
+// these types of brushes to the worldspawn when we write them.
+// We should move a brush to be part of the worldspawn if:
+// - The brush is not part of a brush entity.
+// - The brush is part of a group, or a custom layer that will be exported.
+static inline bool shouldMoveBrushToWorldspawn(const Model::BrushNode& brushNode) {
+  const Model::EntityNodeBase* entityNode = brushNode.entity();
+  const Model::LayerNode* layerNode = brushNode.containingLayer();
+
+  if (!layerNode || !entityNode) {
+    return false;
+  }
+
+  const Model::Layer& layer = layerNode->layer();
+  const Model::Entity& entity = entityNode->entity();
+
+  const bool isInCustomExportedLayer = !layer.defaultLayer() && !layer.omitFromExport();
+  const bool isInGroup = brushNode.containedInGroup();
+  const bool isWorldBrush = entity.hasProperty(
+    Model::EntityPropertyKeys::Classname, Model::EntityPropertyValues::WorldspawnClassname);
+
+  return (isInCustomExportedLayer || isInGroup) && isWorldBrush;
+}
+
+// Don't write TrenchBroom-specific keys in a VMF export.
+static inline bool shouldExcludeProperty(const std::string& key) {
+  return kdl::cs::str_is_prefix(key, "_tb_");
+}
+
 VmfFileSerializer::VmfFileSerializer(std::ostream& stream)
   : NodeSerializer()
   , m_stream(stream) {}
@@ -70,10 +111,16 @@ void VmfFileSerializer::doBeginFile(const std::vector<const Model::Node*>& rootN
 void VmfFileSerializer::doEndFile() {}
 
 void VmfFileSerializer::doBeginEntity(const Model::Node* node) {
-  NodeSerializer::ObjectNo entID = entityNo() + 1;
+  m_processingGroupOrLayer = isGroupOrLayer(node);
+
+  if (m_processingGroupOrLayer) {
+    return;
+  }
+
+  NodeSerializer::ObjectNo entID = m_entityID++;
   pushStartLine();
 
-  const std::string entKey = node->name() == "worldspawn" ? "world" : "entity";
+  const std::string entKey = isWorldspawn(*node) ? "world" : "entity";
   format(m_stream, "\"{}\"\n", entKey);
   format(m_stream, "{{\n");
   format(m_stream, "\t\"id\" \"{}\"\n", entID);
@@ -81,6 +128,15 @@ void VmfFileSerializer::doBeginEntity(const Model::Node* node) {
 }
 
 void VmfFileSerializer::doEndEntity(const Model::Node* node) {
+  if (m_processingGroupOrLayer) {
+    m_processingGroupOrLayer = false;
+    return;
+  }
+
+  if (isWorldspawn(*node)) {
+    writeBrushesMovedToWorldspawn();
+  }
+
   format(m_stream, "}}\n");
   ++m_line;
 
@@ -88,24 +144,30 @@ void VmfFileSerializer::doEndEntity(const Model::Node* node) {
 }
 
 void VmfFileSerializer::doEntityProperty(const Model::EntityProperty& attribute) {
+  if (m_processingGroupOrLayer || shouldExcludeProperty(attribute.key())) {
+    return;
+  }
+
   format(
     m_stream, "\t{} {}\n", quoteEscapedString(attribute.key()),
     quoteEscapedString(attribute.value()));
+  ++m_line;
 }
 
 void VmfFileSerializer::doBrush(const Model::BrushNode* brush) {
-  m_startLineStack.push_back(m_line);
+  if (shouldMoveBrushToWorldspawn(*brush)) {
+    // Handled in doEndEntity() for worldspawn.
+    return;
+  }
+
+  pushStartLine();
 
   auto it = m_nodeToPrecomputedString.find(brush);
   ensure(
     it != std::end(m_nodeToPrecomputedString),
     "Attempted to serialize a brush which was not processed by precomputeBrushesAndPatches()");
 
-  const PrecomputedString& precomputedString = it->second;
-  m_stream << precomputedString.string;
-  m_line += precomputedString.lineCount;
-
-  setFilePosition(brush);
+  writePrecomputedString(it->first, it->second);
 }
 
 void VmfFileSerializer::doBrushFace(const Model::BrushFace& /* face */) {
@@ -233,7 +295,7 @@ VmfFileSerializer::PrecomputedString VmfFileSerializer::writeBrushFaces(
   format(stream, "\t}}\n");
   ++lines;
 
-  return PrecomputedString{stream.str(), lines};
+  return PrecomputedString{stream.str(), lines, shouldMoveBrushToWorldspawn(*brush.brushNode)};
 }
 
 size_t VmfFileSerializer::writeBrushFace(
@@ -289,6 +351,22 @@ size_t VmfFileSerializer::writeBrushFace(
 
   ValveKeyValuesWriter(stream).write(side, 2);
   return ValveKeyValuesWriter::countOutputLines(side);
+}
+
+void VmfFileSerializer::writeBrushesMovedToWorldspawn() {
+  for (const auto& it : m_nodeToPrecomputedString) {
+    if (it.second.moveToWorldspawn) {
+      pushStartLine();
+      writePrecomputedString(it.first, it.second);
+    }
+  }
+}
+
+void VmfFileSerializer::writePrecomputedString(
+  const Model::Node* brush, const PrecomputedString& pStr) {
+  m_stream << pStr.string;
+  m_line += pStr.lineCount;
+  setFilePosition(brush);
 }
 } // namespace IO
 } // namespace TrenchBroom

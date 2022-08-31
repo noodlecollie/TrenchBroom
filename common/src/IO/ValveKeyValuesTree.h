@@ -96,6 +96,8 @@ public:
   // Root is owned by the tree. Once the tree dies, all descendant nodes die as well.
   ValveKeyValuesNode* getRoot() const;
 
+  void clear();
+
 private:
   // Note that we can't use std::make_unique() to initialise this,
   // as this doesn't seem to work for friend classes. We have to

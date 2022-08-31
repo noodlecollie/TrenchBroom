@@ -40,11 +40,13 @@
 #include "IO/GameConfigParser.h"
 #include "IO/IOUtils.h"
 #include "IO/ImageSpriteParser.h"
+#include "IO/MapFileSerializer.h"
 #include "IO/Md2Parser.h"
 #include "IO/Md3Parser.h"
 #include "IO/MdlParser.h"
 #include "IO/MdxParser.h"
 #include "IO/NodeReader.h"
+#include "IO/NodeSerializer.h"
 #include "IO/NodeWriter.h"
 #include "IO/ObjParser.h"
 #include "IO/ObjSerializer.h"
@@ -71,6 +73,7 @@
 #include <kdl/string_utils.h>
 #include <kdl/vector_utils.h>
 
+#include <memory>
 #include <vecmath/vec_io.h>
 
 #include <fstream>
@@ -218,7 +221,7 @@ void GameImpl::doWriteMap(WorldNode& world, const IO::Path& path, const bool exp
   }
   IO::writeGameComment(file, gameName(), mapFormatName);
 
-  IO::NodeWriter writer(world, file);
+  IO::NodeWriter writer(world, IO::MapFileSerializer::create(world.mapFormat(), file, exporting));
   writer.setExporting(exporting);
   writer.setEmptyTextureMapping(m_config.textureConfig.emptyTexture);
   writer.writeMap();
