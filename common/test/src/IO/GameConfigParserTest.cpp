@@ -139,6 +139,7 @@ TEST_CASE("GameConfigParserTest.parseQuakeConfig", "[GameConfigParserTest]") {
         Model::PackageFormatConfig{{"D"}, "idmip"},
         Path{"gfx/palette.lmp"},
         "wad",
+        Model::BrushFaceAttributes::NoTextureName,
         Path{},
         {}},
       Model::EntityConfig{
@@ -396,6 +397,7 @@ TEST_CASE("GameConfigParserTest.parseQuake2Config", "[GameConfigParserTest]") {
         Model::PackageFormatConfig{{"wal"}, "wal"},
         Path{"pics/colormap.pcx"},
         "_tb_textures",
+        Model::BrushFaceAttributes::NoTextureName,
         Path{},
         {}},
       Model::EntityConfig{{Path{"Quake2.fgd"}}, {"md2"}, Color{0.6f, 0.6f, 0.6f, 1.0f}, {}},
@@ -712,12 +714,14 @@ TEST_CASE("GameConfigParserTest.parseExtrasConfig", "[GameConfigParserTest]") {
         Model::PackageFormatConfig{{""}, "q3shader"},
         Path{},
         "_tb_textures",
+        Model::BrushFaceAttributes::NoTextureName,
         Path{"scripts"},
         {"*_norm", "*_gloss"}},
       Model::EntityConfig{
         {Path{"Extras.ent"}},
         {"md3"},
         Color{0.6f, 0.6f, 0.6f, 1.0f},
+        {},
         EL::Expression{
           EL::ArrayExpression{{
             // the line numbers are not checked

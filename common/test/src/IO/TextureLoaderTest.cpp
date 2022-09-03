@@ -44,6 +44,7 @@ TEST_CASE("TextureLoaderTest.testLoad", "[TextureLoaderTest]") {
     Model::PackageFormatConfig{{"D"}, "idmip"},
     IO::Path{"fixture/test/palette.lmp"},
     "wad",
+    Model::BrushFaceAttributes::NoTextureName,
     IO::Path{},
     {}};
 
@@ -86,6 +87,7 @@ TEST_CASE("TextureLoaderTest.testLoadExclusions", "[TextureLoaderTest]") {
     Model::PackageFormatConfig{{"D"}, "idmip"},
     IO::Path{"fixture/test/palette.lmp"},
     "wad",
+    Model::BrushFaceAttributes::NoTextureName,
     IO::Path{},
     {"*-jam", "coffin2", "czg_*"}};
 

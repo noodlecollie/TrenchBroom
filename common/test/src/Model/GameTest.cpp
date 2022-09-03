@@ -45,7 +45,8 @@ TEST_CASE("GameTest.findTextureCollections", "[GameTest]") {
     FileSystemConfig{IO::Path{"baseq2"}, PackageFormatConfig{}},
     TextureConfig{
       TextureDirectoryPackageConfig{IO::Path{"textures"}}, PackageFormatConfig{{"wal"}, "wal"},
-      IO::Path{"pics/colormap.pcx"}, "_tb_textures", IO::Path{}, std::vector<std::string>{}},
+      IO::Path{"pics/colormap.pcx"}, "_tb_textures", Model::BrushFaceAttributes::NoTextureName,
+      IO::Path{}, std::vector<std::string>{}},
     EntityConfig{},
     FaceAttribsConfig{},
     std::vector<SmartTag>{},

@@ -19,6 +19,8 @@
 
 #include "IO/VmfFileSerializer.h"
 
+#include "Assets/EntityDefinition.h"
+#include "Assets/PropertyDefinition.h"
 #include "Ensure.h"
 #include "IO/ValveKeyValuesTree.h"
 #include "IO/ValveKeyValuesWriter.h"
@@ -125,6 +127,8 @@ void VmfFileSerializer::doBeginEntity(const Model::Node* node) {
   format(m_stream, "{{\n");
   format(m_stream, "\t\"id\" \"{}\"\n", entID);
   m_line += 3;
+
+  writeMandatoryDefaultEntityProperties(node);
 }
 
 void VmfFileSerializer::doEndEntity(const Model::Node* node) {
@@ -327,7 +331,7 @@ size_t VmfFileSerializer::writeBrushFace(
                               ? Model::BrushFaceAttributes::NoTextureName
                               : face.attributes().textureName();
 
-  if (textureName == Model::BrushFaceAttributes::NoTextureName) {
+  if (exporting() && textureName == Model::BrushFaceAttributes::NoTextureName) {
     textureName = getEmptyTextureMapping();
   }
 
@@ -367,6 +371,42 @@ void VmfFileSerializer::writePrecomputedString(
   m_stream << pStr.string;
   m_line += pStr.lineCount;
   setFilePosition(brush);
+}
+
+// Here's something I didn't know about Hammer: properties that begin with an
+// underscore eg "_light" in a light entity, are always written to a VMF even
+// if their value has not been changed within the map. If these entries are
+// not written, VRAD doesn't know what these properties actually are (since
+// they come from the FGD), so treats them as zero. This is obviously bad.
+// Here, we check the entity's definition for any properties that begin with
+// an underscore and make sure they are written.
+void VmfFileSerializer::writeMandatoryDefaultEntityProperties(const Model::Node* node) {
+  const Model::EntityNodeBase* entityNode = dynamic_cast<const Model::EntityNodeBase*>(node);
+
+  if (!entityNode) {
+    return;
+  }
+
+  const Model::Entity& entity = entityNode->entity();
+  const Assets::EntityDefinition* entityDefinition = entity.definition();
+
+  if (!entityDefinition) {
+    return;
+  }
+
+  for (const std::shared_ptr<Assets::PropertyDefinition>& propertyDefinition :
+       entityDefinition->propertyDefinitions()) {
+    const std::string& key = propertyDefinition->key();
+
+    if (kdl::cs::str_is_prefix(key, "_") && !entity.hasProperty(key)) {
+      const std::string defaultValue =
+        Assets::PropertyDefinition::defaultValue(*propertyDefinition);
+
+      if (!defaultValue.empty()) {
+        doEntityProperty(Model::EntityProperty(key, defaultValue));
+      }
+    }
+  }
 }
 } // namespace IO
 } // namespace TrenchBroom

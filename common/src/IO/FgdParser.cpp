@@ -531,8 +531,12 @@ FgdParser::PropertyDefinitionList FgdParser::parsePropertyDefinitions(ParserStat
     }
 
     assert(propertyDefinition != nullptr);
-    if (!addPropertyDefinition(propertyDefinitions, std::move(propertyDefinition))) {
-      status.warn(line, column, "Skipping duplicate property definition: '" + propertyKey + "'");
+
+    // I/O not supported yet, so just ignore the definition in that case.
+    if (!wasInputOrOutput) {
+      if (!addPropertyDefinition(propertyDefinitions, std::move(propertyDefinition))) {
+        status.warn(line, column, "Skipping duplicate property definition: '" + propertyKey + "'");
+      }
     }
 
     token = expect(status, FgdToken::Word | FgdToken::CBracket, m_tokenizer.nextToken());

@@ -74,6 +74,7 @@ private:
   size_t writeBrushFace(std::ostream& stream, const Model::BrushFace& face, size_t faceID) const;
   void writeBrushesMovedToWorldspawn();
   void writePrecomputedString(const Model::Node* brush, const PrecomputedString& pStr);
+  void writeMandatoryDefaultEntityProperties(const Model::Node* node);
 
   std::ostream& m_stream;
   size_t m_line = 1;

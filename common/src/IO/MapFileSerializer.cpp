@@ -84,7 +84,7 @@ protected:
                                 ? Model::BrushFaceAttributes::NoTextureName
                                 : face.attributes().textureName();
 
-    if (textureName == Model::BrushFaceAttributes::NoTextureName) {
+    if (exporting() && textureName == Model::BrushFaceAttributes::NoTextureName) {
       textureName = getEmptyTextureMapping();
     }
 
@@ -100,7 +100,7 @@ protected:
                                 ? Model::BrushFaceAttributes::NoTextureName
                                 : face.attributes().textureName();
 
-    if (textureName == Model::BrushFaceAttributes::NoTextureName) {
+    if (exporting() && textureName == Model::BrushFaceAttributes::NoTextureName) {
       textureName = getEmptyTextureMapping();
     }
 

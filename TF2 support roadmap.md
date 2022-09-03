@@ -98,8 +98,32 @@ Fancier brush types, and moving along face normals and in 3D space, could be add
 
 ## V2+ (QoL)
 
+### This Fork
+
 * Rendering of particle systems.
 * Easier texture/model/sound browsing.
 * Viewing collision models.
 * Translate TrenchBroom layers/groups to Hammer visgroups.
 * Add support for importing from VMF.
+* Add shortcut for making brushes into a "detail" type, and back again. The detail class should be specified in the game config.
+
+### Upstream
+
+* Infinite 2D viewport selection using lasso select.
+* Colour picker for colour properties, including support for lighting intensity as a fourth parameter.
+* Set a default texture scale in game config.
+* View option to show entity names only when selected.
+* Hold shift while navigating to double camera speed.
+* Support icon sprites for entities (if this is not already a thing that's supported).
+* Add texture alignment shortcuts: align to top/bottom/left/right/centre, stretch to fit in X/Y/both.
+* Add option for viewports to automatically scroll if you drag an object outside of their range.
+* Add button in texture browser to go to texture on currently selected face.
+	* There is already a context menu shortcut for this, but it would be nice if there was a texture browser button too.
+* Increase camera movement speed when centring views on selection.
+* Add option for automatically applying texture lock when cloning an object.
+* Improve angles indicator for orientable entities: add arrow shaft, allow accounting for cases where pitch is a separate property.
+* Add ability to pick an entity's angles from another entity, including accounting for cases where pitch is a separate property.
+* Option in properties window to toggle display of unused entity spawn flag values. Should default to not showing them.
+* For entity properties where a choice can be selected, display the choice description alongside the number in the properties view.
+* Allow the compile option rows to be collapsed and give more space to the compile output window.
+* Allow importing configurations, for quick and easy compilation presets.

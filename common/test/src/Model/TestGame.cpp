@@ -175,6 +175,7 @@ void TestGame::doLoadTextureCollections(
     Model::PackageFormatConfig{{"D"}, "idmip"},
     IO::Path{"data/palette.lmp"},
     "wad",
+    Model::BrushFaceAttributes::NoTextureName,
     IO::Path{},
     {}};
 
