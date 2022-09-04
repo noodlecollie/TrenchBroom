@@ -4,7 +4,7 @@ As per [here](https://github.com/TrenchBroom/TrenchBroom/issues/4072), these cha
 * Individual features will be developed by branching off `development` and then merging back in with a squash commit.
 * When upstream creates a new release that we want to use, we can update local `master` to mirror `upstream/master` and then rebase `development` on the release tag.
 
-## V0 (minimum required)
+## V0 (Minimum Required) (Complete)
 
 * Use an asset scheme where content is sourced from VPKs, plus directories on disk.
 	* This is done, at least in a first pass.
@@ -106,6 +106,7 @@ Fancier brush types, and moving along face normals and in 3D space, could be add
 * Translate TrenchBroom layers/groups to Hammer visgroups.
 * Add support for importing from VMF.
 * Add shortcut for making brushes into a "detail" type, and back again. The detail class should be specified in the game config.
+* Automatically load texture collection if single collection is set in config.
 
 ### Upstream
 
