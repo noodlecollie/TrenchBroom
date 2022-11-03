@@ -19,26 +19,19 @@
 
 #pragma once
 
-#include "IO/Tokenizer.h"
+#include <cstdint>
 
 namespace TrenchBroom {
 namespace IO {
-namespace ValveKeyValuesToken {
-using Type = unsigned int;
-static const Type Eof = 1 << 0;
-static const Type String = 1 << 1;
-static const Type OBrace = 1 << 2;
-static const Type CBrace = 1 << 3;
-static const Type NewLine = 1 << 4;
-static const Type ControlStatement = 1 << 5;
-} // namespace ValveKeyValuesToken
+class Reader;
 
-class ValveKeyValuesTokenizer : public Tokenizer<ValveKeyValuesToken::Type> {
-public:
-  explicit ValveKeyValuesTokenizer(std::string_view str);
+int32_t getMdlVersion(Reader& reader);
+bool isSourceMdlIdentifier(int32_t ident);
+bool isSourceMdlVersion(int32_t version);
 
-private:
-  Token emitToken() override;
-};
+bool isSourceVvdIdentifier(int32_t ident);
+bool isSourceVvdVersion(int32_t version);
+
+bool isSourceVtxVersion(int32_t version);
 } // namespace IO
 } // namespace TrenchBroom

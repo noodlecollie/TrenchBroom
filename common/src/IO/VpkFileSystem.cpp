@@ -27,8 +27,6 @@
 #include "IO/FileMatcher.h"
 #include "IO/VpkUtils.h"
 #include "Logger.h"
-#include "kdl/string_compare.h"
-#include "kdl/string_utils.h"
 
 namespace TrenchBroom {
 namespace IO {
@@ -92,9 +90,7 @@ struct VPKV2_DirEntry {
 
 // We don't want to bother about listing files in VPKs that don't fall under these extensions:
 static const std::vector<std::string> SUPPORTED_EXTENSIONS = {
-  "vmt",
-  "vtf",
-  "mdl",
+  "vmt", "vtf", "mdl", "vtx", "vvd",
 };
 
 struct VpkFileSystem::DirEntry {

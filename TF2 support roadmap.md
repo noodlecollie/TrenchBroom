@@ -41,13 +41,17 @@ Potentially useful libraries for reading assets:
 
 ## V1
 
-* Add support for reading MDL files for models.
+* Add support for reading MDL files for models, and for using models in the editor.
 * Add support for entity I/O.
 * Add support for compiling maps on non-Windows platforms.
 
 ### MDLs
 
 There is no obvious library on GitHub for reading MDLs. [Assimp](https://github.com/assimp/assimp/blob/master/code/AssetLib/MDL/MDLLoader.h#L142) has an apparently incomplete implementation, so we could perhaps use this to write our own.
+
+The support for MDLs that has now been implemented is enough to get them to display, but there are oddities which are very difficult to work out. For physics-based models, eg. the Sniper ragdoll, the `poseToBone` matrices on bones seem to be important for getting them to orient correctly, but I cannot for the life of me work out how to properly use them, and trying to do that has really stalled development. For now I'm going to leave support as-is, which seems to work fine for many models, and come back to this as/when I actually need to.
+
+To make models actually usable (eg. for static props), we will need to at least provide a file browser that browses VPK and disk content, and perhaps that provides previews of models and allows you to search. We will also need to provide a way to override the entity model that's being used for display, so that specifying a model in an entity property will show you the model in the game.
 
 ### Entity I/O
 
@@ -100,6 +104,7 @@ Fancier brush types, and moving along face normals and in 3D space, could be add
 
 ### This Fork
 
+* Decals and overlays
 * Rendering of particle systems.
 * Easier texture/model/sound browsing.
 * Viewing collision models.
@@ -107,6 +112,7 @@ Fancier brush types, and moving along face normals and in 3D space, could be add
 * Add support for importing from VMF.
 * Add shortcut for making brushes into a "detail" type, and back again. The detail class should be specified in the game config.
 * Automatically load texture collection if single collection is set in config.
+* Add support for excluding mod folders like `bin` and `platform`
 
 ### Upstream
 
@@ -128,3 +134,4 @@ Fancier brush types, and moving along face normals and in 3D space, could be add
 * For entity properties where a choice can be selected, display the choice description alongside the number in the properties view.
 * Allow the compile option rows to be collapsed and give more space to the compile output window.
 * Allow importing configurations, for quick and easy compilation presets.
+* Progress dialogue when loading editor for the first time, so it's not just a white screen.

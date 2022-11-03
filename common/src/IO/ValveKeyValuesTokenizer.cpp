@@ -46,16 +46,11 @@ Tokenizer<ValveKeyValuesToken::Type>::Token ValveKeyValuesTokenizer::emitToken()
         }
 
         discardUntil("\r\n");
-        m_hasKeyWithoutValue = false;
-        m_expectNewLine = false;
-
         break;
       }
 
       case '{': {
-        recordFinalCharacterOnLine(startLine, startColumn, *firstChar);
         advance();
-        m_hasKeyWithoutValue = false;
 
         return Token(
           ValveKeyValuesToken::OBrace, firstChar, firstChar + 1, offset(firstChar), startLine,
@@ -63,9 +58,7 @@ Tokenizer<ValveKeyValuesToken::Type>::Token ValveKeyValuesTokenizer::emitToken()
       }
 
       case '}': {
-        recordFinalCharacterOnLine(startLine, startColumn, *firstChar);
         advance();
-        m_hasKeyWithoutValue = false;
 
         return Token(
           ValveKeyValuesToken::CBrace, firstChar, firstChar + 1, offset(firstChar), startLine,
@@ -77,16 +70,14 @@ Tokenizer<ValveKeyValuesToken::Type>::Token ValveKeyValuesTokenizer::emitToken()
         firstChar = curPos();
         const char* quotedString = readQuotedString();
         return Token(
-          consumeKeyOrValue(), firstChar, quotedString, offset(firstChar), startLine, startColumn);
+          ValveKeyValuesToken::String, firstChar, quotedString, offset(firstChar), startLine,
+          startColumn);
       }
 
       case '#': {
         advance();
         firstChar = curPos();
         const char* str = readUntil("\r\n");
-        m_hasKeyWithoutValue = false;
-        m_expectNewLine = false;
-
         return Token(
           ValveKeyValuesToken::ControlStatement, firstChar, str, offset(firstChar), startLine,
           startColumn);
@@ -100,8 +91,9 @@ Tokenizer<ValveKeyValuesToken::Type>::Token ValveKeyValuesTokenizer::emitToken()
 
       case '\n':
       case '\r': {
-        discardWhile("\r\n");
-        m_hasKeyWithoutValue = false;
+        const char* str = readWhile("\r\n");
+        return Token(
+          ValveKeyValuesToken::NewLine, firstChar, str, offset(firstChar), startLine, startColumn);
         break;
       }
 
@@ -110,7 +102,7 @@ Tokenizer<ValveKeyValuesToken::Type>::Token ValveKeyValuesTokenizer::emitToken()
 
         if (str) {
           return Token(
-            consumeKeyOrValue(), firstChar, str, offset(firstChar), startLine, startColumn);
+            ValveKeyValuesToken::String, firstChar, str, offset(firstChar), startLine, startColumn);
         } else {
           throw ParserException(
             startLine, startColumn, "Unexpected character: '" + std::string(firstChar, 1) + "'");
@@ -121,27 +113,6 @@ Tokenizer<ValveKeyValuesToken::Type>::Token ValveKeyValuesTokenizer::emitToken()
   }
 
   return Token(ValveKeyValuesToken::Eof, nullptr, nullptr, length(), line(), column());
-}
-
-ValveKeyValuesToken::Type ValveKeyValuesTokenizer::consumeKeyOrValue() {
-  ValveKeyValuesToken::Type tokenType =
-    m_hasKeyWithoutValue ? ValveKeyValuesToken::Value : ValveKeyValuesToken::Key;
-
-  m_hasKeyWithoutValue = !m_hasKeyWithoutValue;
-
-  if (tokenType == ValveKeyValuesToken::Value) {
-    m_expectNewLine = true;
-  }
-
-  return tokenType;
-}
-
-void ValveKeyValuesTokenizer::recordFinalCharacterOnLine(size_t line, size_t column, char input) {
-  if (m_expectNewLine) {
-    throw ParserException(line, column, "Expected newline but got '" + std::to_string(input) + "'");
-  }
-
-  m_expectNewLine = true;
 }
 } // namespace IO
 } // namespace TrenchBroom

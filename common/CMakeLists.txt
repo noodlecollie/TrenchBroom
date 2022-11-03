@@ -84,6 +84,12 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/IO/ResourceUtils.cpp
         ${COMMON_SOURCE_DIR}/IO/SimpleParserStatus.cpp
         ${COMMON_SOURCE_DIR}/IO/SkinLoader.cpp
+        ${COMMON_SOURCE_DIR}/IO/SourceMdlDataAccessor.cpp
+        ${COMMON_SOURCE_DIR}/IO/SourceMdlFormatUtils.cpp
+        ${COMMON_SOURCE_DIR}/IO/SourceMdlHelpers.cpp
+        ${COMMON_SOURCE_DIR}/IO/SourceMdlParser.cpp
+        ${COMMON_SOURCE_DIR}/IO/SourceVtxDataAccessor.cpp
+        ${COMMON_SOURCE_DIR}/IO/SourceVvdDataAccessor.cpp
         ${COMMON_SOURCE_DIR}/IO/SprParser.cpp
         ${COMMON_SOURCE_DIR}/IO/StandardMapParser.cpp
         ${COMMON_SOURCE_DIR}/IO/SystemPaths.cpp
@@ -579,6 +585,15 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/IO/ResourceUtils.h
         ${COMMON_SOURCE_DIR}/IO/SimpleParserStatus.h
         ${COMMON_SOURCE_DIR}/IO/SkinLoader.h
+        ${COMMON_SOURCE_DIR}/IO/SourceMdlDataAccessor.h
+        ${COMMON_SOURCE_DIR}/IO/SourceMdlFormatUtils.h
+        ${COMMON_SOURCE_DIR}/IO/SourceMdlHelpers.h
+        ${COMMON_SOURCE_DIR}/IO/SourceMdlLayout.h
+        ${COMMON_SOURCE_DIR}/IO/SourceMdlParser.h
+        ${COMMON_SOURCE_DIR}/IO/SourceVtxLayout.h
+        ${COMMON_SOURCE_DIR}/IO/SourceVtxDataAccessor.h
+        ${COMMON_SOURCE_DIR}/IO/SourceVvdLayout.h
+        ${COMMON_SOURCE_DIR}/IO/SourceVvdDataAccessor.h
         ${COMMON_SOURCE_DIR}/IO/SprParser.h
         ${COMMON_SOURCE_DIR}/IO/StandardMapParser.h
         ${COMMON_SOURCE_DIR}/IO/SystemPaths.h

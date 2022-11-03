@@ -18,6 +18,9 @@
  */
 
 #include "IO/ValveKeyValuesTree.h"
+#include "kdl/string_compare.h"
+#include "kdl/string_utils.h"
+#include <memory>
 
 namespace TrenchBroom {
 namespace IO {
@@ -99,6 +102,40 @@ const ValveKeyValuesNode* ValveKeyValuesNode::getChild(size_t index) const {
 
 void ValveKeyValuesNode::clearChildren() {
   m_children.clear();
+}
+
+ValveKeyValuesNode* ValveKeyValuesNode::findChildByKey(const std::string& key, bool caseSensitive) {
+  return const_cast<ValveKeyValuesNode*>(
+    const_cast<const ValveKeyValuesNode*>(this)->findChildByKey(key, caseSensitive));
+}
+
+const ValveKeyValuesNode* ValveKeyValuesNode::findChildByKey(
+  const std::string& key, bool caseSensitive) const {
+  for (const NodeUniquePtr& node : m_children) {
+    if (caseSensitive) {
+      if (kdl::cs::str_is_equal(node->getKey(), key)) {
+        return node.get();
+      }
+    } else {
+      if (kdl::ci::str_is_equal(node->getKey(), key)) {
+        return node.get();
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+bool ValveKeyValuesNode::hasChildWithBooleanValue(
+  const std::string& key, bool value, bool caseSensitive) const {
+  const ValveKeyValuesNode* child = findChildByKey(key, caseSensitive);
+
+  if (!child) {
+    return false;
+  }
+
+  const bool childValue = kdl::str_to_int(child->getValueString()) != 0;
+  return childValue == value;
 }
 
 std::string ValveKeyValuesNode::getValueString() const {

@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "Assets/Texture.h"
+#include "Color.h"
 #include "IO/TextureReader.h"
 
 namespace TrenchBroom {
@@ -44,12 +46,15 @@ private:
     Assets::TextureBuffer (*)(const void* in, size_t inLength, size_t width, size_t height);
 
   Assets::Texture doReadTexture(std::shared_ptr<File> file) const override;
-  Assets::Texture readTextureFromVtf(std::shared_ptr<File> file) const;
+  Assets::Texture readTextureFromVtf(std::shared_ptr<File> file, bool wipeAlphaChannel) const;
 
-  Assets::Texture readTexture_RegularUncompressed(
-    const VtfHeaderBuffer& header, std::shared_ptr<File> file, unsigned int format) const;
-  Assets::Texture readTexture_DXT(
+  Assets::TextureBuffer readTexture_RegularUncompressed(
+    const VtfHeaderBuffer& header, std::shared_ptr<File> file) const;
+  Assets::TextureBuffer readTexture_DXT(
     const VtfHeaderBuffer& header, std::shared_ptr<File> file, DXTDecompressFunc decompFunc) const;
+
+  Color postProcessTextureAndComputeAvgColour(
+    Assets::TextureBuffer& buffer, unsigned int format, bool wipeAlphaChannel) const;
 };
 } // namespace IO
 } // namespace TrenchBroom

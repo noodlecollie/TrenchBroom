@@ -51,6 +51,8 @@
 #include "IO/ObjParser.h"
 #include "IO/ObjSerializer.h"
 #include "IO/SimpleParserStatus.h"
+#include "IO/SourceMdlFormatUtils.h"
+#include "IO/SourceMdlParser.h"
 #include "IO/SprParser.h"
 #include "IO/SystemPaths.h"
 #include "IO/TextureLoader.h"
@@ -505,10 +507,15 @@ std::unique_ptr<Assets::EntityModel> GameImpl::doInitializeModel(
     const auto supported = m_config.entityConfig.modelFormats;
 
     if (isModelFormat("mdl", extension, supported)) {
-      const auto palette = loadTexturePalette();
       auto reader = file->reader().buffer();
-      IO::MdlParser parser(modelName, std::begin(reader), std::end(reader), palette);
-      return parser.initializeModel(logger);
+      if (IO::isSourceMdlVersion(IO::getMdlVersion(reader))) {
+        IO::SourceMdlParser parser(path, modelName, std::begin(reader), std::end(reader), m_fs);
+        return parser.initializeModel(logger);
+      } else {
+        const auto palette = loadTexturePalette();
+        IO::MdlParser parser(modelName, std::begin(reader), std::end(reader), palette);
+        return parser.initializeModel(logger);
+      }
     } else if (isModelFormat("md2", extension, supported)) {
       const auto palette = loadTexturePalette();
       auto reader = file->reader().buffer();
@@ -574,10 +581,15 @@ void GameImpl::doLoadFrame(
     const auto supported = m_config.entityConfig.modelFormats;
 
     if (isModelFormat("mdl", extension, supported)) {
-      const auto palette = loadTexturePalette();
       auto reader = file->reader().buffer();
-      IO::MdlParser parser(modelName, std::begin(reader), std::end(reader), palette);
-      parser.loadFrame(frameIndex, model, logger);
+      if (IO::isSourceMdlVersion(IO::getMdlVersion(reader))) {
+        IO::SourceMdlParser parser(path, modelName, std::begin(reader), std::end(reader), m_fs);
+        parser.loadFrame(frameIndex, model, logger);
+      } else {
+        const auto palette = loadTexturePalette();
+        IO::MdlParser parser(modelName, std::begin(reader), std::end(reader), palette);
+        parser.loadFrame(frameIndex, model, logger);
+      }
     } else if (isModelFormat("md2", extension, supported)) {
       const auto palette = loadTexturePalette();
       auto reader = file->reader().buffer();

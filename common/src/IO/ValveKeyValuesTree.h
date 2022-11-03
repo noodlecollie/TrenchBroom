@@ -56,6 +56,14 @@ public:
   const ValveKeyValuesNode* getChild(size_t index) const;
   void clearChildren();
 
+  // Searches immediate children only.
+  ValveKeyValuesNode* findChildByKey(const std::string& key, bool caseSensitive = false);
+  const ValveKeyValuesNode* findChildByKey(
+    const std::string& key, bool caseSensitive = false) const;
+
+  bool hasChildWithBooleanValue(
+    const std::string& key, bool value = true, bool caseSensitive = false) const;
+
   std::string getValueString() const;
 
   // Any existing children are killed.

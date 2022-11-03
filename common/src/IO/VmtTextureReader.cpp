@@ -19,90 +19,96 @@
 
 #include "IO/VmtTextureReader.h"
 #include "Assets/Texture.h"
+#include "Assets/TextureBuffer.h"
 #include "Ensure.h"
+#include "Exceptions.h"
 #include "IO/File.h"
 #include "IO/FileSystem.h"
+#include "IO/ValveKeyValuesParser.h"
+#include "IO/ValveKeyValuesTree.h"
 #include "IO/VtfDefs.h"
 #include "IO/VtfHeaderBuffer.h"
 #include "IO/VtfUtils.h"
 #include "Logger.h"
+#include "kdl/string_compare.h"
 #include <cstdint>
 #include <cstring>
 
 namespace TrenchBroom {
 namespace IO {
-static std::vector<char>::const_iterator findStringCaseInsensitive(
-  const std::vector<char>& strHaystack, const std::string& strNeedle,
-  std::vector<char>::difference_type offset = 0) {
-  const std::vector<char>::const_iterator begin = strHaystack.begin() + offset;
-  return std::search(
-    begin, strHaystack.end(), strNeedle.begin(), strNeedle.end(), [](char ch1, char ch2) {
-      return std::toupper(ch1) == std::toupper(ch2);
-    });
+static bool isSupportedMaterialShader(const std::string& shader) {
+  return kdl::ci::str_compare(shader, "LightmappedGeneric") ||
+         kdl::ci::str_compare(shader, "LightmappedReflective") ||
+         kdl::ci::str_compare(shader, "WorldTwoTextureBlend") ||
+         kdl::ci::str_compare(shader, "WorldVertexTransition") ||
+         kdl::ci::str_compare(shader, "VertexLitGeneric") ||
+         kdl::ci::str_compare(shader, "Water") || kdl::ci::str_compare(shader, "UnlitGeneric");
 }
 
-// Super dumb function just finds the first instance of "$basetexture"
-static std::string getBaseTextureFromKeyValues(Reader& reader) {
-  static constexpr char BASETEXTURE_KEY[] = "$basetexture";
-
-  std::vector<char> buffer(reader.size() + 1);
-
-  reader.seekFromBegin(0);
-  reader.read(buffer.data(), buffer.size() - 1);
-  buffer[buffer.size() - 1] = '\0';
-
-  std::vector<char>::difference_type offset = 0;
-
-  while (true) {
-    const std::vector<char>::const_iterator baseTextureKey =
-      findStringCaseInsensitive(buffer, BASETEXTURE_KEY, offset);
-
-    if (baseTextureKey == buffer.end()) {
-      break;
-    }
-
-    // Find the beginning of the value.
-    std::vector<char>::const_iterator valueBegin = baseTextureKey + sizeof(BASETEXTURE_KEY) - 1;
-    const bool keyEndWasValid = *valueBegin == '"' || *valueBegin == ' ' || *valueBegin == '\t';
-
-    if (!keyEndWasValid) {
-      offset = valueBegin - buffer.begin();
-      continue;
-    }
-
-    if (*valueBegin == '"') {
-      ++valueBegin;
-    }
-
-    while (*valueBegin && std::isspace(*valueBegin)) {
-      ++valueBegin;
-    }
-
-    if (!(*valueBegin)) {
-      break;
-    }
-
-    std::vector<char>::const_iterator valueEnd = valueBegin;
-
-    while (*valueEnd && *valueEnd != '\r' && *valueEnd != '\n') {
-      ++valueEnd;
-    }
-
-    // Trim whitespace
-    while (valueEnd > valueBegin && std::isspace(*(valueEnd - 1))) {
-      --valueEnd;
-    }
-
-    // Trim quotes
-    if (valueEnd - valueBegin >= 2 && *valueBegin == '"' && *(valueEnd - 1) == '"') {
-      ++valueBegin;
-      --valueEnd;
-    }
-
-    return std::string(valueBegin, valueEnd);
+static ValveKeyValuesTree readKVFile(Logger& logger, const std::shared_ptr<File>& file) {
+  if (!file) {
+    throw AssetException("VMT file was not valid");
   }
 
-  return std::string();
+  BufferedReader reader = file->reader().buffer();
+  ValveKeyValuesTree tree;
+
+  try {
+    ValveKeyValuesParser kvParser(reader.stringView());
+    kvParser.parse(logger, tree);
+  } catch (const ParserException& ex) {
+    throw AssetException(ex.what());
+  }
+
+  return tree;
+}
+
+static std::string getBaseTexture(ValveKeyValuesNode* material) {
+  ensure(material, "Material node was null");
+
+  if (!isSupportedMaterialShader(material->getKey())) {
+    throw AssetException(
+      "Could not obtain base texture: material type '" + material->getKey() +
+      "' is not supported.");
+  }
+
+  ValveKeyValuesNode* baseTexture = material->findChildByKey("$basetexture");
+
+  if (!baseTexture) {
+    // Check to see if this is an eye.
+    baseTexture = material->findChildByKey("$iris");
+
+    if (!baseTexture) {
+      throw AssetException("Could not obtain base texture: no entry was found in material.");
+    }
+  }
+
+  const std::string baseTextureStr = baseTexture->getValueString();
+
+  if (baseTextureStr.empty()) {
+    throw AssetException("Could not obtain base texture: entry was empty.");
+  }
+
+  return baseTextureStr;
+}
+
+static bool shouldIgnoreAlphaChannel(ValveKeyValuesNode* material) {
+  ensure(material, "Material node was null");
+
+  // Is the alpha channel being used as a mask of some kind?
+  if (
+    material->hasChildWithBooleanValue("$basealphaenvmapmask") ||
+    material->hasChildWithBooleanValue("$selfillum") ||
+    material->hasChildWithBooleanValue("$basemapalphaphongmask")) {
+    return true;
+  }
+
+  // Is the material used for a character eye?
+  if (material->findChildByKey("$iris")) {
+    return true;
+  }
+
+  return false;
 }
 
 static size_t computeImageDataOffset(const VtfHeaderBuffer& header) {
@@ -122,17 +128,52 @@ static size_t computeImageDataOffset(const VtfHeaderBuffer& header) {
   }
 }
 
+static Color getAverageColour4Channel(const Assets::TextureBuffer& buffer, const GLenum format) {
+  ensure(format == GL_RGBA || format == GL_BGRA, "expected RGBA or BGRA");
+
+  const unsigned char* const data = buffer.data();
+  const std::size_t bufferSize = buffer.size();
+
+  Color average;
+  for (std::size_t i = 0; i < bufferSize; i += 4) {
+    average = average + Color(data[i], data[i + 1], data[i + 2], data[i + 3]);
+  }
+  const std::size_t numPixels = bufferSize / 4;
+  average = average / static_cast<float>(numPixels);
+
+  return average;
+}
+
+static Color getAverageColour3Channel(const Assets::TextureBuffer& buffer, const GLenum format) {
+  ensure(format == GL_RGB || format == GL_BGR, "expected RGB or BGR");
+
+  const unsigned char* const data = buffer.data();
+  const std::size_t bufferSize = buffer.size();
+
+  Color average;
+  for (std::size_t i = 0; i < bufferSize; i += 3) {
+    average = average + Color(data[i], data[i + 1], data[i + 2]);
+  }
+  const std::size_t numPixels = bufferSize / 3;
+  average = average / static_cast<float>(numPixels);
+
+  return average;
+}
+
 VmtTextureReader::VmtTextureReader(
   const NameStrategy& nameStrategy, const FileSystem& fs, Logger& logger)
   : TextureReader(nameStrategy, fs, logger) {}
 
 Assets::Texture VmtTextureReader::doReadTexture(std::shared_ptr<File> file) const {
-  auto reader = file->reader();
-  const std::string baseTexture = getBaseTextureFromKeyValues(reader);
+  ValveKeyValuesTree tree = readKVFile(m_logger, file);
+  ValveKeyValuesNode* material = tree.getRoot()->getChild(0);
 
-  if (baseTexture.empty()) {
-    throw AssetException("Could not identify base texture for '" + file->path().asString() + "'");
+  if (!material) {
+    throw AssetException("Could not obtain base texture: file was empty");
   }
+
+  const std::string baseTexture = getBaseTexture(material);
+  const bool ignoreAlpha = shouldIgnoreAlphaChannel(material);
 
   const Path baseTexturePath = Path("materials/" + baseTexture + ".vtf");
 
@@ -148,10 +189,11 @@ Assets::Texture VmtTextureReader::doReadTexture(std::shared_ptr<File> file) cons
     throw AssetException(std::string(ex.what()));
   }
 
-  return readTextureFromVtf(vtfFile);
+  return readTextureFromVtf(vtfFile, ignoreAlpha);
 }
 
-Assets::Texture VmtTextureReader::readTextureFromVtf(std::shared_ptr<File> file) const {
+Assets::Texture VmtTextureReader::readTextureFromVtf(
+  std::shared_ptr<File> file, bool wipeAlphaChannel) const {
   auto reader = file->reader();
   VtfHeaderBuffer headerBuffer(reader.subReaderFromBegin(0));
 
@@ -161,29 +203,46 @@ Assets::Texture VmtTextureReader::readTextureFromVtf(std::shared_ptr<File> file)
     throw AssetException("VTF signature for '" + file->path().asString() + "' was incorrect");
   }
 
+  Assets::TextureBuffer textureBuffer;
+  unsigned int format = GL_RGBA;
+
   switch (header70->imageFormat) {
     case Vtf::IMAGE_FORMAT_RGBA8888: {
-      return readTexture_RegularUncompressed(headerBuffer, file, GL_RGBA);
+      format = GL_RGBA;
+      textureBuffer = readTexture_RegularUncompressed(headerBuffer, file);
+      break;
     }
     case Vtf::IMAGE_FORMAT_RGB888:
     case Vtf::IMAGE_FORMAT_RGB888_BLUESCREEN: {
-      return readTexture_RegularUncompressed(headerBuffer, file, GL_RGB);
+      format = GL_RGB;
+      textureBuffer = readTexture_RegularUncompressed(headerBuffer, file);
+      break;
     }
     case Vtf::IMAGE_FORMAT_BGRA8888: {
-      return readTexture_RegularUncompressed(headerBuffer, file, GL_BGRA);
+      format = GL_BGRA;
+      textureBuffer = readTexture_RegularUncompressed(headerBuffer, file);
+      break;
     }
     case Vtf::IMAGE_FORMAT_BGR888:
     case Vtf::IMAGE_FORMAT_BGR888_BLUESCREEN: {
-      return readTexture_RegularUncompressed(headerBuffer, file, GL_BGR);
+      format = GL_BGR;
+      textureBuffer = readTexture_RegularUncompressed(headerBuffer, file);
+      break;
     }
     case Vtf::IMAGE_FORMAT_DXT1: {
-      return readTexture_DXT(headerBuffer, file, &Vtf::decompressDXT1);
+      format = GL_RGBA;
+      textureBuffer = readTexture_DXT(headerBuffer, file, &Vtf::decompressDXT1);
+      break;
     }
     case Vtf::IMAGE_FORMAT_DXT3: {
-      return readTexture_DXT(headerBuffer, file, &Vtf::decompressDXT3);
+      format = GL_RGBA;
+      textureBuffer = readTexture_DXT(headerBuffer, file, &Vtf::decompressDXT3);
+      break;
     }
     case Vtf::IMAGE_FORMAT_DXT5: {
-      return readTexture_DXT(headerBuffer, file, &Vtf::decompressDXT5);
+      format = GL_RGBA;
+      textureBuffer = readTexture_DXT(headerBuffer, file, &Vtf::decompressDXT5);
+      break;
     }
     default: {
       const Vtf::ImageFormatInfo* info =
@@ -194,10 +253,18 @@ Assets::Texture VmtTextureReader::readTextureFromVtf(std::shared_ptr<File> file)
         "' was unknown or unsupported");
     }
   }
+
+  const Color avgColour =
+    postProcessTextureAndComputeAvgColour(textureBuffer, format, wipeAlphaChannel);
+
+  return Assets::Texture(
+    textureName(file->path()), header70->width, header70->height, avgColour,
+    std::move(textureBuffer), format,
+    wipeAlphaChannel ? Assets::TextureType::Opaque : Assets::TextureType::Masked);
 }
 
-Assets::Texture VmtTextureReader::readTexture_RegularUncompressed(
-  const VtfHeaderBuffer& header, std::shared_ptr<File> file, unsigned int format) const {
+Assets::TextureBuffer VmtTextureReader::readTexture_RegularUncompressed(
+  const VtfHeaderBuffer& header, std::shared_ptr<File> file) const {
   const Vtf::Header_70* header70 = header.basicHeader();
 
   size_t offset = computeImageDataOffset(header);
@@ -210,14 +277,10 @@ Assets::Texture VmtTextureReader::readTexture_RegularUncompressed(
   Assets::TextureBuffer texBuffer(mipSize);
   reader.read(reinterpret_cast<char*>(texBuffer.data()), texBuffer.size());
 
-  // TODO: Compute average colour?
-  // TODO: Determine if the texture should be opaque or not?
-  return Assets::Texture(
-    textureName(file->path()), header70->width, header70->height, Color(0.0f, 0.0f, 0.0f, 1.0f),
-    std::move(texBuffer), format, Assets::TextureType::Opaque);
+  return texBuffer;
 }
 
-Assets::Texture VmtTextureReader::readTexture_DXT(
+Assets::TextureBuffer VmtTextureReader::readTexture_DXT(
   const VtfHeaderBuffer& header, std::shared_ptr<File> file, DXTDecompressFunc decompFunc) const {
   ensure(decompFunc, "No decompression function provided");
 
@@ -233,12 +296,29 @@ Assets::Texture VmtTextureReader::readTexture_DXT(
   std::vector<uint8_t> mipData(mipSize);
   reader.read(mipData.data(), mipData.size());
 
-  // TODO: Compute average colour?
-  // TODO: Determine if the texture should be opaque or not?
-  return Assets::Texture(
-    textureName(file->path()), header70->width, header70->height, Color(0.0f, 0.0f, 0.0f, 1.0f),
-    decompFunc(mipData.data(), mipData.size(), header70->width, header70->height), GL_RGBA,
-    Assets::TextureType::Opaque);
+  return decompFunc(mipData.data(), mipData.size(), header70->width, header70->height);
+}
+
+Color VmtTextureReader::postProcessTextureAndComputeAvgColour(
+  Assets::TextureBuffer& buffer, unsigned int format, bool wipeAlphaChannel) const {
+
+  if (format == GL_RGBA || format == GL_BGRA) {
+    if (wipeAlphaChannel) {
+      const size_t bufferSize = buffer.size();
+      unsigned char* bufferData = buffer.data();
+
+      for (size_t index = 3; index < bufferSize; index += 4) {
+        bufferData[index] = 0xFF;
+      }
+    }
+
+    return getAverageColour4Channel(buffer, format);
+  } else if (format == GL_RGB || format == GL_BGR) {
+    // No alpha to manipulate
+    return getAverageColour3Channel(buffer, format);
+  } else {
+    throw AssetException("Unsupported GL texture format encountered");
+  }
 }
 } // namespace IO
 } // namespace TrenchBroom

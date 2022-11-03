@@ -39,7 +39,9 @@ public:
 private:
   using Token = ValveKeyValuesTokenizer::Token;
 
+  void parseRootNode(Logger& logger, ValveKeyValuesNode& parent);
   void parseNodeRecursive(Logger& logger, ValveKeyValuesNode& parent);
+  TokenNameMap tokenNames() const override;
 
   ValveKeyValuesTokenizer m_tokenizer;
 };

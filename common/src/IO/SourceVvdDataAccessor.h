@@ -19,26 +19,33 @@
 
 #pragma once
 
-#include "IO/Tokenizer.h"
+#include "IO/Reader.h"
+#include "IO/SourceMdlLayout.h"
+#include "IO/SourceVvdLayout.h"
+#include <memory>
+#include <vector>
 
 namespace TrenchBroom {
 namespace IO {
-namespace ValveKeyValuesToken {
-using Type = unsigned int;
-static const Type Eof = 1 << 0;
-static const Type String = 1 << 1;
-static const Type OBrace = 1 << 2;
-static const Type CBrace = 1 << 3;
-static const Type NewLine = 1 << 4;
-static const Type ControlStatement = 1 << 5;
-} // namespace ValveKeyValuesToken
+class File;
 
-class ValveKeyValuesTokenizer : public Tokenizer<ValveKeyValuesToken::Type> {
+class SourceVvdDataAccessor {
 public:
-  explicit ValveKeyValuesTokenizer(std::string_view str);
+  // Assumes file is valid
+  explicit SourceVvdDataAccessor(const std::shared_ptr<File>& file);
+
+  void validate(SourceMdlLayout::Header mdlHeader) const;
+  const std::vector<SourceVvdLayout::Vertex>& consolidateVertices(size_t rootLOD);
 
 private:
-  Token emitToken() override;
+  void consolidatePlainVertices();
+  void consolidateVerticesWithFixUp();
+
+  std::shared_ptr<File> m_file;
+  BufferedReader m_reader;
+  SourceVvdLayout::Header m_header;
+  std::vector<SourceVvdLayout::Vertex> m_vertices;
+  size_t m_rootLOD = 0;
 };
 } // namespace IO
 } // namespace TrenchBroom
