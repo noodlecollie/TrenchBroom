@@ -49,6 +49,7 @@
 #include "View/ClipTool.h"
 #include "View/ColorButton.h"
 #include "View/CompilationDialog.h"
+#include "View/DebugFileSystemBrowserWindow.h"
 #include "View/EdgeTool.h"
 #include "View/FaceInspector.h"
 #include "View/FaceTool.h"
@@ -1914,6 +1915,11 @@ void MapFrame::debugSetWindowSize() {
 
 void MapFrame::debugShowPalette() {
   DebugPaletteWindow* window = new DebugPaletteWindow(this);
+  showModelessDialog(window);
+}
+
+void MapFrame::debugShowFileSystemBrowser() {
+  DebugFileSystemBrowserWindow* window = new DebugFileSystemBrowserWindow(this);
   showModelessDialog(window);
 }
 

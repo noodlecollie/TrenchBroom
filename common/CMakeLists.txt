@@ -319,6 +319,7 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/View/CurrentGameIndicator.cpp
         ${COMMON_SOURCE_DIR}/View/CurrentGroupCommand.cpp
         ${COMMON_SOURCE_DIR}/View/CyclingMapView.cpp
+        ${COMMON_SOURCE_DIR}/View/DebugFileSystemBrowserWindow.cpp
         ${COMMON_SOURCE_DIR}/View/DialogHeader.cpp
         ${COMMON_SOURCE_DIR}/View/DirectoryTextureCollectionEditor.cpp
         ${COMMON_SOURCE_DIR}/View/DragTracker.cpp
@@ -342,6 +343,7 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/View/FaceInspector.cpp
         ${COMMON_SOURCE_DIR}/View/FaceTool.cpp
         ${COMMON_SOURCE_DIR}/View/FaceToolController.cpp
+        ${COMMON_SOURCE_DIR}/View/FileSystemBrowserWidget.cpp
         ${COMMON_SOURCE_DIR}/View/FileTextureCollectionEditor.cpp
         ${COMMON_SOURCE_DIR}/View/FlagsEditor.cpp
         ${COMMON_SOURCE_DIR}/View/FlagsPopupEditor.cpp
@@ -862,6 +864,7 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/View/CurrentGameIndicator.h
         ${COMMON_SOURCE_DIR}/View/CurrentGroupCommand.h
         ${COMMON_SOURCE_DIR}/View/CyclingMapView.h
+        ${COMMON_SOURCE_DIR}/View/DebugFileSystemBrowserWindow.h
         ${COMMON_SOURCE_DIR}/View/DialogHeader.h
         ${COMMON_SOURCE_DIR}/View/DirectoryTextureCollectionEditor.h
         ${COMMON_SOURCE_DIR}/View/DragTracker.h
@@ -885,6 +888,7 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/View/FaceInspector.h
         ${COMMON_SOURCE_DIR}/View/FaceTool.h
         ${COMMON_SOURCE_DIR}/View/FaceToolController.h
+        ${COMMON_SOURCE_DIR}/View/FileSystemBrowserWidget.h
         ${COMMON_SOURCE_DIR}/View/FileTextureCollectionEditor.h
         ${COMMON_SOURCE_DIR}/View/FlagsEditor.h
         ${COMMON_SOURCE_DIR}/View/FlagsPopupEditor.h

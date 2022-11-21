@@ -2076,6 +2076,15 @@ void ActionManager::createDebugMenu() {
     [](ActionExecutionContext& context) {
       return context.hasDocument();
     }));
+  debugMenu.addItem(createMenuAction(
+    IO::Path("Menu/Debug/Show File System Browser..."), QObject::tr("Show File System Browser..."),
+    0,
+    [](ActionExecutionContext& context) {
+      context.frame()->debugShowFileSystemBrowser();
+    },
+    [](ActionExecutionContext& context) {
+      return context.hasDocument();
+    }));
 #endif
 }
 
