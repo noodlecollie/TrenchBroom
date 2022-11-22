@@ -51,6 +51,14 @@ void Game::setAdditionalSearchPaths(const std::vector<IO::Path>& searchPaths, Lo
   doSetAdditionalSearchPaths(searchPaths, logger);
 }
 
+FileSystemBrowserModel& Game::fileSystemBrowserModel() {
+  return doFileSystemBrowserModel();
+}
+
+const FileSystemBrowserModel& Game::fileSystemBrowserModel() const {
+  return doFileSystemBrowserModel();
+}
+
 Game::PathErrors Game::checkAdditionalSearchPaths(const std::vector<IO::Path>& searchPaths) const {
   return doCheckAdditionalSearchPaths(searchPaths);
 }

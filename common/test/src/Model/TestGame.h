@@ -58,6 +58,8 @@ private:
   void doSetAdditionalSearchPaths(
     const std::vector<IO::Path>& searchPaths, Logger& logger) override;
   PathErrors doCheckAdditionalSearchPaths(const std::vector<IO::Path>& searchPaths) const override;
+  FileSystemBrowserModel& doFileSystemBrowserModel() override;
+  const FileSystemBrowserModel& doFileSystemBrowserModel() const override;
 
   const CompilationConfig& doCompilationConfig() override;
   size_t doMaxPropertyLength() const override;

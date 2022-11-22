@@ -130,6 +130,14 @@ Game::PathErrors GameImpl::doCheckAdditionalSearchPaths(
   return result;
 }
 
+FileSystemBrowserModel& GameImpl::doFileSystemBrowserModel() {
+  return m_fsBrowserModel;
+}
+
+const FileSystemBrowserModel& GameImpl::doFileSystemBrowserModel() const {
+  return m_fsBrowserModel;
+}
+
 const CompilationConfig& GameImpl::doCompilationConfig() {
   return m_config.compilationConfig;
 }

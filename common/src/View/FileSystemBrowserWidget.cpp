@@ -19,13 +19,16 @@
 
 #include "View/FileSystemBrowserWidget.h"
 
+#include "Model/FileSystemBrowserModel.h"
+#include "Model/Game.h"
 #include <QComboBox>
 #include <QHBoxLayout>
+#include <QHeaderView>
 #include <QLineEdit>
+#include <QSplitter>
 #include <QTableView>
 #include <QTreeView>
 #include <QVBoxLayout>
-#include <QSplitter>
 
 namespace TrenchBroom {
 namespace View {
@@ -49,9 +52,30 @@ FileSystemBrowserWidget::FileSystemBrowserWidget(QWidget* parent, Qt::WindowFlag
   m_FileSystemTableView = new QTableView();
   splitter->addWidget(m_FileSystemTableView);
 
+  m_FileSystemTableView->horizontalHeader()->setStretchLastSection(true);
+  m_FileSystemTableView->verticalHeader()->setVisible(false);
+  m_FileSystemTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+  m_FileSystemTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+
   layout->addLayout(topLayout);
   layout->addWidget(splitter);
   setLayout(layout);
+}
+
+void FileSystemBrowserWidget::setGame(const std::shared_ptr<Model::Game>& game) {
+  if (game == m_Game) {
+    return;
+  }
+
+  m_Game = game;
+  refresh();
+}
+
+void FileSystemBrowserWidget::refresh() {
+  Model::FileSystemBrowserModel* fsModel = m_Game ? &m_Game->fileSystemBrowserModel() : nullptr;
+
+  m_FileSystemTreeView->setModel(fsModel);
+  m_FileSystemTableView->setModel(fsModel);
 }
 } // namespace View
 } // namespace TrenchBroom

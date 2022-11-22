@@ -1920,6 +1920,11 @@ void MapFrame::debugShowPalette() {
 
 void MapFrame::debugShowFileSystemBrowser() {
   DebugFileSystemBrowserWindow* window = new DebugFileSystemBrowserWindow(this);
+
+  if (m_document) {
+    window->setGame(m_document->game());
+  }
+
   showModelessDialog(window);
 }
 

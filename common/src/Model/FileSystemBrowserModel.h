@@ -19,27 +19,21 @@
 
 #pragma once
 
-#include <QDialog>
-#include <memory>
+#include <QAbstractItemModel>
 
 namespace TrenchBroom {
 namespace Model {
-class Game;
-}
-
-namespace View {
-class FileSystemBrowserWidget;
-
-class DebugFileSystemBrowserWindow : public QDialog {
+class FileSystemBrowserModel : public QAbstractItemModel {
   Q_OBJECT
 public:
-  explicit DebugFileSystemBrowserWindow(QWidget* parent = nullptr);
-  virtual ~DebugFileSystemBrowserWindow();
-
-  void setGame(const std::shared_ptr<Model::Game>& game);
-
-private:
-  FileSystemBrowserWidget* m_BrowserWidget = nullptr;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
+  QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+  QVariant headerData(
+    int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+  int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
 };
-} // namespace View
+} // namespace Model
 } // namespace TrenchBroom

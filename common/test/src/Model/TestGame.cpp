@@ -31,6 +31,7 @@
 #include "IO/TextureLoader.h"
 #include "Model/BrushFace.h"
 #include "Model/Entity.h"
+#include "Model/FileSystemBrowserModel.h"
 #include "Model/GameConfig.h"
 #include "Model/WorldNode.h"
 
@@ -85,6 +86,16 @@ void TestGame::doSetAdditionalSearchPaths(
 Game::PathErrors TestGame::doCheckAdditionalSearchPaths(
   const std::vector<IO::Path>& /* searchPaths */) const {
   return PathErrors();
+}
+
+FileSystemBrowserModel& TestGame::doFileSystemBrowserModel() {
+  static FileSystemBrowserModel dummyModel;
+  return dummyModel;
+}
+
+const FileSystemBrowserModel& TestGame::doFileSystemBrowserModel() const {
+  static const FileSystemBrowserModel dummyModel;
+  return dummyModel;
 }
 
 const CompilationConfig& TestGame::doCompilationConfig() {

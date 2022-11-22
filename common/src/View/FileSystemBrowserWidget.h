@@ -20,6 +20,7 @@
 #pragma once
 
 #include <QWidget>
+#include <memory>
 
 class QComboBox;
 class QLineEdit;
@@ -27,6 +28,10 @@ class QTreeView;
 class QTableView;
 
 namespace TrenchBroom {
+namespace Model {
+class Game;
+}
+
 namespace View {
 class FileSystemBrowserWidget : public QWidget {
   Q_OBJECT
@@ -34,7 +39,13 @@ public:
   explicit FileSystemBrowserWidget(
     QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
+  void setGame(const std::shared_ptr<Model::Game>& game);
+
 private:
+  void refresh();
+
+  std::shared_ptr<Model::Game> m_Game;
+
   QComboBox* m_FileSystemBucketComboBox = nullptr;
   QLineEdit* m_FilePathTextBox = nullptr;
   QTreeView* m_FileSystemTreeView = nullptr;

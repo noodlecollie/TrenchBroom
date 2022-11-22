@@ -19,8 +19,8 @@
 
 #include "View/DebugFileSystemBrowserWindow.h"
 
-#include <QVBoxLayout>
 #include "View/FileSystemBrowserWidget.h"
+#include <QVBoxLayout>
 
 namespace TrenchBroom {
 namespace View {
@@ -37,5 +37,9 @@ DebugFileSystemBrowserWindow::DebugFileSystemBrowserWindow(QWidget* parent)
 }
 
 DebugFileSystemBrowserWindow::~DebugFileSystemBrowserWindow() {}
+
+void DebugFileSystemBrowserWindow::setGame(const std::shared_ptr<Model::Game>& game) {
+  m_BrowserWidget->setGame(game);
+}
 } // namespace View
 } // namespace TrenchBroom

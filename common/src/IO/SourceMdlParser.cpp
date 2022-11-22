@@ -23,6 +23,7 @@
 #include "Ensure.h"
 #include "Exceptions.h"
 #include "IO/File.h"
+#include "IO/FileSystem.h"
 #include "IO/Path.h"
 #include "IO/ResourceUtils.h"
 #include "IO/SourceMdlDataAccessor.h"
@@ -33,7 +34,6 @@
 #include "IO/TextureReader.h"
 #include "IO/VmtTextureReader.h"
 #include "Logger.h"
-#include "Model/GameFileSystem.h"
 #include "Renderer/IndexRangeMapBuilder.h"
 #include "Renderer/PrimType.h"
 #include "kdl/string_utils.h"
@@ -53,7 +53,7 @@ static inline IO::Path makeTextureDiskPath(const std::string& dir, const std::st
 }
 
 std::shared_ptr<File> SourceMdlParser::TextureLookupData::openTextureFile(
-  const Model::GameFileSystem& fs, size_t index) const {
+  const IO::FileSystem& fs, size_t index) const {
   if (index >= texturePaths.size()) {
     throw AssetException("Index was out of range");
   }
@@ -70,7 +70,7 @@ std::shared_ptr<File> SourceMdlParser::TextureLookupData::openTextureFile(
 
 SourceMdlParser::SourceMdlParser(
   const IO::Path& path, const std::string& name, const char* begin, const char* end,
-  const Model::GameFileSystem& fs)
+  const IO::FileSystem& fs)
   : m_path(path)
   , m_name(name)
   , m_begin(begin)
