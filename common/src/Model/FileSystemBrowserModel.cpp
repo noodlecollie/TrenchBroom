@@ -18,21 +18,22 @@
  */
 
 #include "Model/FileSystemBrowserModel.h"
+#include "IO/FileSystem.h"
+#include "IO/Path.h"
 #include <qabstractitemmodel.h>
 #include <qnamespace.h>
 #include <qvariant.h>
 
 namespace TrenchBroom {
 namespace Model {
+FileSystemBrowserModel::FileSystemBrowserModel(IO::FileSystem* fs, QObject* parent)
+  : QAbstractItemModel(parent)
+  , m_fs(fs) {}
+
 Qt::ItemFlags FileSystemBrowserModel::flags(const QModelIndex& index) const {
   // TODO
-  Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled;
-
-  if (index.parent().isValid()) {
-    flags |= Qt::ItemNeverHasChildren;
-  }
-
-  return flags;
+  Q_UNUSED(index);
+  return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 QVariant FileSystemBrowserModel::data(const QModelIndex& index, int role) const {
@@ -86,6 +87,11 @@ QModelIndex FileSystemBrowserModel::parent(const QModelIndex& index) const {
   return parentData != 0
            ? createIndex(static_cast<int>(parentData - 1), 0, static_cast<quintptr>(0))
            : QModelIndex();
+}
+
+bool FileSystemBrowserModel::hasChildren(const QModelIndex& parent) const {
+  // TODO
+  return !parent.parent().isValid();
 }
 } // namespace Model
 } // namespace TrenchBroom

@@ -89,12 +89,12 @@ Game::PathErrors TestGame::doCheckAdditionalSearchPaths(
 }
 
 FileSystemBrowserModel& TestGame::doFileSystemBrowserModel() {
-  static FileSystemBrowserModel dummyModel;
+  static FileSystemBrowserModel dummyModel(nullptr);
   return dummyModel;
 }
 
 const FileSystemBrowserModel& TestGame::doFileSystemBrowserModel() const {
-  static const FileSystemBrowserModel dummyModel;
+  static const FileSystemBrowserModel dummyModel(nullptr);
   return dummyModel;
 }
 

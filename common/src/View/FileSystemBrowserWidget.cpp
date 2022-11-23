@@ -48,9 +48,11 @@ FileSystemBrowserWidget::FileSystemBrowserWidget(QWidget* parent, Qt::WindowFlag
 
   m_FileSystemTreeView = new QTreeView();
   splitter->addWidget(m_FileSystemTreeView);
+  splitter->setStretchFactor(0, 1);
 
   m_FileSystemTableView = new QTableView();
   splitter->addWidget(m_FileSystemTableView);
+  splitter->setStretchFactor(1, 2);
 
   m_FileSystemTableView->horizontalHeader()->setStretchLastSection(true);
   m_FileSystemTableView->verticalHeader()->setVisible(false);

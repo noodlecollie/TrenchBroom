@@ -86,6 +86,7 @@ namespace TrenchBroom {
 namespace Model {
 GameImpl::GameImpl(GameConfig& config, const IO::Path& gamePath, Logger& logger)
   : m_config(config)
+  , m_fsBrowserModel(&m_fs)
   , m_gamePath(gamePath) {
   initializeFileSystem(logger);
 }
