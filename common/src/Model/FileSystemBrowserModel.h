@@ -19,7 +19,12 @@
 
 #pragma once
 
+#include "IO/Path.h"
 #include <QAbstractItemModel>
+#include <QHash>
+#include <QList>
+#include <QScopedPointer>
+#include <QString>
 
 namespace TrenchBroom {
 namespace IO {
@@ -32,6 +37,8 @@ class FileSystemBrowserModel : public QAbstractItemModel {
 public:
   FileSystemBrowserModel(IO::FileSystem* fs, QObject* parent = nullptr);
 
+  void reset();
+
   Qt::ItemFlags flags(const QModelIndex& index) const override;
   QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
   QVariant headerData(
@@ -43,7 +50,66 @@ public:
   bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
 
 private:
+  class Node {
+  public:
+    Node()
+      : m_fullPath(".") {}
+
+    Node(const IO::Path& fullPath, Node* parent = nullptr)
+      : m_parent(parent)
+      , m_fullPath(fullPath) {}
+
+    ~Node() { destroyChildren(); }
+
+    Node* parent() const { return m_parent; }
+    const IO::Path& fullPath() const { return m_fullPath; }
+    bool isDirectory() const { return !m_children.isNull(); }
+    bool isRoot() const { return m_parent == nullptr; }
+    bool hasChildren() const { return m_children && m_children->count() > 0; }
+
+    void setIsDirectory(bool isDir) {
+      if (isDir == isDirectory()) {
+        return;
+      }
+
+      destroyChildren();
+
+      if (isDir) {
+        m_children.reset(new QList<Node*>());
+      }
+    }
+
+    QList<Node*>* childList() { return m_children.get(); }
+    const QList<Node*>* childList() const { return m_children.get(); }
+
+  private:
+    void destroyChildren() {
+      if (m_children) {
+        qDeleteAll(*m_children);
+        m_children.reset();
+      }
+    }
+
+    Node* m_parent = nullptr;
+    IO::Path m_fullPath;
+    QScopedPointer<QList<Node*>> m_children;
+  };
+
+  using NodeHash = QHash<quintptr, Node*>;
+
+  static quintptr nodeToID(Node* node);
+
+  Node* getNode(quintptr id);
+  const Node* getNode(quintptr id) const;
+
+  Node* getNode(const QModelIndex& index);
+  const Node* getNode(const QModelIndex& index) const;
+
+  void populateNode(Node& node);
+
   IO::FileSystem* m_fs = nullptr;
+  QScopedPointer<Node> m_rootFSNode;
+  NodeHash m_nodeHash;
 };
 } // namespace Model
 } // namespace TrenchBroom

@@ -20,15 +20,25 @@
 #include "Model/FileSystemBrowserModel.h"
 #include "IO/FileSystem.h"
 #include "IO/Path.h"
-#include <qabstractitemmodel.h>
-#include <qnamespace.h>
-#include <qvariant.h>
 
 namespace TrenchBroom {
 namespace Model {
 FileSystemBrowserModel::FileSystemBrowserModel(IO::FileSystem* fs, QObject* parent)
   : QAbstractItemModel(parent)
-  , m_fs(fs) {}
+  , m_fs(fs)
+  , m_rootFSNode(new Node()) {
+  populateNode(*m_rootFSNode);
+}
+
+void FileSystemBrowserModel::reset() {
+  beginResetModel();
+
+  m_nodeHash.clear();
+  m_rootFSNode.reset(new Node());
+  populateNode(*m_rootFSNode);
+
+  endResetModel();
+}
 
 Qt::ItemFlags FileSystemBrowserModel::flags(const QModelIndex& index) const {
   // TODO
@@ -63,22 +73,28 @@ QVariant FileSystemBrowserModel::headerData(
 }
 
 int FileSystemBrowserModel::rowCount(const QModelIndex& parent) const {
-  // TODO
-  return parent.isValid() ? 1 : 5;
+  // Starting out with just one item underneath the root.
+  // TODO: Complete this properly.
+  return (!parent.isValid()) ? 1 : 0;
 }
 
-int FileSystemBrowserModel::columnCount(const QModelIndex& /* parent */) const {
-  // TODO
-  return 2;
+int FileSystemBrowserModel::columnCount(const QModelIndex& parent) const {
+  // Only one column for now.
+  return (!parent.isValid()) ? 1 : 0;
 }
 
 QModelIndex FileSystemBrowserModel::index(int row, int column, const QModelIndex& parent) const {
-  // TODO
-  if (parent.isValid() && row != 0) {
+  // For now, only deal with the root.
+  if (parent.isValid()) {
     return QModelIndex();
   }
 
-  return createIndex(row, column, static_cast<quintptr>(parent.isValid() ? parent.row() + 1 : 0));
+  // TODO: Support more than one row.
+  if (row != 0 || column != 0) {
+    return QModelIndex();
+  }
+
+  // TODO
 }
 
 QModelIndex FileSystemBrowserModel::parent(const QModelIndex& index) const {
@@ -90,8 +106,35 @@ QModelIndex FileSystemBrowserModel::parent(const QModelIndex& index) const {
 }
 
 bool FileSystemBrowserModel::hasChildren(const QModelIndex& parent) const {
-  // TODO
-  return !parent.parent().isValid();
+  const Node* node = getNode(parent);
+  return node ? node->hasChildren() : false;
+}
+
+FileSystemBrowserModel::Node* FileSystemBrowserModel::getNode(quintptr id) {
+  NodeHash::iterator it = m_nodeHash.find(id);
+  return it != m_nodeHash.end() ? it->second : nullptr;
+}
+
+const FileSystemBrowserModel::Node* FileSystemBrowserModel::getNode(quintptr id) const {
+  NodeHash::const_iterator it = m_nodeHash.find(id);
+  return it != m_nodeHash.cend() ? it->second : nullptr;
+}
+
+FileSystemBrowserModel::Node* FileSystemBrowserModel::getNode(const QModelIndex& index) {
+  return index.isValid() ? getNode(index.internalId()) : m_rootFSNode.get();
+}
+
+const FileSystemBrowserModel::Node* FileSystemBrowserModel::getNode(
+  const QModelIndex& index) const {
+  return index.isValid() ? getNode(index.internalId()) : m_rootFSNode.get();
+}
+
+void FileSystemBrowserModel::populateNode(Node& /* node */) {
+  // TODO: Look up the directory in the filesystem and add children for this node.
+}
+
+quintptr FileSystemBrowserModel::nodeToID(Node* node) {
+  return reinterpret_cast<quintptr>(node);
 }
 } // namespace Model
 } // namespace TrenchBroom
