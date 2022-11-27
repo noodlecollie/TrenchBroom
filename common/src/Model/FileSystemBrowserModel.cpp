@@ -25,20 +25,6 @@
 
 namespace TrenchBroom {
 namespace Model {
-enum ColumnPurpose {
-  COLUMN_PATH = 0,
-  COLUMN_IS_DIRECTORY,
-
-  COLUMN__COUNT,
-
-  // Convenience aliases:
-
-  // Column used to obtain the child subtree.
-  // A child's column index in its parent is
-  // always equal to this value.
-  COLUMN_HIERARCHY = COLUMN_PATH
-};
-
 FileSystemBrowserModel::FileSystemBrowserModel(IO::FileSystem* fs, QObject* parent)
   : QAbstractItemModel(parent)
   , m_fs(fs)
@@ -60,24 +46,19 @@ void FileSystemBrowserModel::reset() {
 }
 
 Qt::ItemFlags FileSystemBrowserModel::flags(const QModelIndex& index) const {
-  // TODO
   Q_UNUSED(index);
   return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 QVariant FileSystemBrowserModel::data(const QModelIndex& index, int role) const {
-  if (role != Qt::DisplayRole) {
-    return QVariant();
-  }
-
   const Node* node = getNode(index);
 
   if (!node) {
     return QVariant();
   }
 
-  switch (index.column()) {
-    case COLUMN_PATH: {
+  switch (role) {
+    case ROLE_PATH: {
       const IO::Path& path = node->fullPath();
       const QString pathString =
         QString::fromStdString((!path.components().empty()) ? path.lastComponent().asString() : "");
@@ -85,8 +66,8 @@ QVariant FileSystemBrowserModel::data(const QModelIndex& index, int role) const 
       return QVariant((!pathString.isEmpty()) ? pathString : QString("File System"));
     }
 
-    case COLUMN_IS_DIRECTORY: {
-      return QVariant(node->isDirectory());
+    case ROLE_METAFLAGS: {
+      return QVariant(node->metaFlags());
     }
 
     default: {
@@ -105,19 +86,11 @@ QVariant FileSystemBrowserModel::headerData(
     return QVariant();
   }
 
-  switch (section) {
-    case COLUMN_PATH: {
-      return QVariant(tr("Path"));
-    }
-
-    case COLUMN_IS_DIRECTORY: {
-      return QVariant(tr("Is Directory"));
-    }
-
-    default: {
-      return QVariant();
-    }
+  if (section != 0) {
+    return QVariant();
   }
+
+  return QVariant(tr("Path"));
 }
 
 int FileSystemBrowserModel::rowCount(const QModelIndex& parent) const {
@@ -133,15 +106,15 @@ int FileSystemBrowserModel::rowCount(const QModelIndex& parent) const {
 int FileSystemBrowserModel::columnCount(const QModelIndex& parent) const {
   if (!parent.isValid()) {
     // Root doesn't correspond to a node, but does have columns.
-    return COLUMN__COUNT;
+    return 1;
   }
 
   const Node* node = getNode(parent);
-  return node ? COLUMN__COUNT : 0;
+  return node ? 1 : 0;
 }
 
 QModelIndex FileSystemBrowserModel::index(int row, int column, const QModelIndex& parent) const {
-  if (column < 0 || column >= COLUMN__COUNT || row < 0) {
+  if (column < 0 || column >= 1 || row < 0) {
     return QModelIndex();
   }
 
@@ -191,7 +164,7 @@ QModelIndex FileSystemBrowserModel::parent(const QModelIndex& index) const {
   }
 
   const QModelIndex outIndex =
-    createIndex(parent->indexInParent(), COLUMN_HIERARCHY, nodeToID(parent));
+    createIndex(parent->indexInParent(), 0, nodeToID(parent));
   return outIndex;
 }
 

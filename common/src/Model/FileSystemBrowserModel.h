@@ -35,6 +35,18 @@ namespace Model {
 class FileSystemBrowserModel : public QAbstractItemModel {
   Q_OBJECT
 public:
+  enum DataRole {
+    // Mappings to canonical Qt roles:
+    ROLE_PATH = Qt::DisplayRole,
+
+    // Custom roles:
+    ROLE_METAFLAGS = Qt::UserRole
+  };
+
+  enum MetaFlag {
+    METAFLAG_IS_DIRECTORY = (1 << 0)
+  };
+
   FileSystemBrowserModel(IO::FileSystem* fs, QObject* parent = nullptr);
 
   void reset();
@@ -85,6 +97,16 @@ private:
 
     QList<Node*>* childList() { return m_children.get(); }
     QList<Node*>* childList() const { return m_children.get(); }
+
+    int metaFlags() const {
+      int outFlags = 0;
+
+      if (isDirectory()) {
+        outFlags |= METAFLAG_IS_DIRECTORY;
+      }
+
+      return outFlags;
+    }
 
   private:
     void destroyChildren() {
