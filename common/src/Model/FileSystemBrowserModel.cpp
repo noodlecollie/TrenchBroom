@@ -175,7 +175,7 @@ bool FileSystemBrowserModel::hasChildren(const QModelIndex& parent) const {
   }
 
   const Node* node = getNode(parent);
-  return node && node->isDirectory();
+  return node && node->nodeType() == Node::NodeType::DIRECTORY;
 }
 
 FileSystemBrowserModel::Node* FileSystemBrowserModel::getNode(quintptr id) {
@@ -205,7 +205,7 @@ void FileSystemBrowserModel::populateNode(Node& node) const {
   try {
     cheapDetermineIsDirectory(node);
 
-    if (node.isDirectory()) {
+    if (node.nodeType() == Node::NodeType::DIRECTORY) {
       // This used to be done by calling getDirectoryContents(),
       // but I don't think this works properly - it throws an
       // exception from the first file system in the chain when
@@ -237,6 +237,10 @@ void FileSystemBrowserModel::populateNode(Node& node) const {
 }
 
 void FileSystemBrowserModel::cheapDetermineIsDirectory(Node& node) const {
+  if (node.nodeType() != Node::NodeType::UNKNOWN) {
+    return;
+  }
+
   try {
     node.setIsDirectory(m_fs->directoryExists(node.fullPath()));
   } catch (const FileSystemException&) {

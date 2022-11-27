@@ -64,6 +64,12 @@ public:
 private:
   class Node {
   public:
+    enum class NodeType {
+      UNKNOWN = 0,
+      DIRECTORY,
+      FILE
+    };
+
     Node()
       : m_fullPath("") {}
 
@@ -77,31 +83,31 @@ private:
     Node* parent() const { return m_parent; }
     int indexInParent() const { return m_indexInParent; }
     const IO::Path& fullPath() const { return m_fullPath; }
-    bool isDirectory() const { return !m_children.isNull(); }
+    NodeType nodeType() const { return m_type; }
     bool isRoot() const { return m_parent == nullptr; }
     bool hasChildren() const { return m_children && m_children->count() > 0; }
     bool isEvaluated() const { return m_isEvaluated; }
     void setIsEvaluated(bool evaluated) { m_isEvaluated = evaluated; }
 
     void setIsDirectory(bool isDir) {
-      if (isDir == isDirectory()) {
+      if ((isDir && m_type == NodeType::DIRECTORY) || (!isDir && m_type == NodeType::FILE)) {
         return;
       }
 
       destroyChildren();
+      m_type = isDir ? NodeType::DIRECTORY : NodeType::FILE;
 
-      if (isDir) {
+      if (m_type == NodeType::DIRECTORY) {
         m_children.reset(new QList<Node*>());
       }
     }
 
-    QList<Node*>* childList() { return m_children.get(); }
     QList<Node*>* childList() const { return m_children.get(); }
 
     int metaFlags() const {
       int outFlags = 0;
 
-      if (isDirectory()) {
+      if (m_type == NodeType::DIRECTORY) {
         outFlags |= METAFLAG_IS_DIRECTORY;
       }
 
@@ -121,6 +127,7 @@ private:
     IO::Path m_fullPath;
     QScopedPointer<QList<Node*>> m_children;
     bool m_isEvaluated = false;
+    NodeType m_type = NodeType::UNKNOWN;
   };
 
   using NodeHash = QHash<quintptr, Node*>;
