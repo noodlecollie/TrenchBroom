@@ -19,38 +19,19 @@
 
 #pragma once
 
-#include <QWidget>
-#include <memory>
-
-class QLineEdit;
-class QTreeView;
-class QTableView;
+#include <QSortFilterProxyModel>
 
 namespace TrenchBroom {
 namespace Model {
-class Game;
-class FileSystemBrowserTreeProxyModel;
-}
+class FileSystemBrowserModel;
 
-namespace View {
-class FileSystemBrowserWidget : public QWidget {
+class FileSystemBrowserTreeProxyModel : public QSortFilterProxyModel {
   Q_OBJECT
 public:
-  explicit FileSystemBrowserWidget(
-    QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+  explicit FileSystemBrowserTreeProxyModel(QObject* parent = nullptr);
 
-  void setGame(const std::shared_ptr<Model::Game>& game);
-
-private:
-  void refresh();
-
-  std::shared_ptr<Model::Game> m_Game;
-
-  QLineEdit* m_filePathTextBox = nullptr;
-  QTreeView* m_fileSystemTreeView = nullptr;
-  QTableView* m_fileSystemTableView = nullptr;
-
-  Model::FileSystemBrowserTreeProxyModel* m_treeProxyModel = nullptr;
+protected:
+  bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 };
-} // namespace View
+} // namespace Model
 } // namespace TrenchBroom

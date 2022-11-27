@@ -17,40 +17,27 @@
  along with TrenchBroom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <QWidget>
-#include <memory>
-
-class QLineEdit;
-class QTreeView;
-class QTableView;
+#include "Model/FileSystemBrowserTreeProxyModel.h"
+#include "Model/FileSystemBrowserModel.h"
 
 namespace TrenchBroom {
 namespace Model {
-class Game;
-class FileSystemBrowserTreeProxyModel;
+FileSystemBrowserTreeProxyModel::FileSystemBrowserTreeProxyModel(QObject* parent)
+  : QSortFilterProxyModel(parent) {}
+
+bool FileSystemBrowserTreeProxyModel::filterAcceptsRow(
+  int sourceRow, const QModelIndex& sourceParent) const {
+  QAbstractItemModel* src = sourceModel();
+
+  if (!src) {
+    return false;
+  }
+
+  const QModelIndex srcIndex = src->index(sourceRow, 0, sourceParent);
+  const QVariant flagVar = src->data(srcIndex, Model::FileSystemBrowserModel::ROLE_METAFLAGS);
+
+  return flagVar.isValid() &&
+         (flagVar.toInt() & Model::FileSystemBrowserModel::METAFLAG_IS_DIRECTORY);
 }
-
-namespace View {
-class FileSystemBrowserWidget : public QWidget {
-  Q_OBJECT
-public:
-  explicit FileSystemBrowserWidget(
-    QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-
-  void setGame(const std::shared_ptr<Model::Game>& game);
-
-private:
-  void refresh();
-
-  std::shared_ptr<Model::Game> m_Game;
-
-  QLineEdit* m_filePathTextBox = nullptr;
-  QTreeView* m_fileSystemTreeView = nullptr;
-  QTableView* m_fileSystemTableView = nullptr;
-
-  Model::FileSystemBrowserTreeProxyModel* m_treeProxyModel = nullptr;
-};
-} // namespace View
+} // namespace Model
 } // namespace TrenchBroom

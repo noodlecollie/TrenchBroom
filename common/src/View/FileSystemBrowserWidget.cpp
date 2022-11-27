@@ -20,6 +20,7 @@
 #include "View/FileSystemBrowserWidget.h"
 
 #include "Model/FileSystemBrowserModel.h"
+#include "Model/FileSystemBrowserTreeProxyModel.h"
 #include "Model/Game.h"
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -34,30 +35,31 @@ namespace TrenchBroom {
 namespace View {
 FileSystemBrowserWidget::FileSystemBrowserWidget(QWidget* parent, Qt::WindowFlags f)
   : QWidget(parent, f) {
+  m_treeProxyModel = new Model::FileSystemBrowserTreeProxyModel(this);
+
   QVBoxLayout* layout = new QVBoxLayout();
 
   QHBoxLayout* topLayout = new QHBoxLayout();
 
-  m_FileSystemBucketComboBox = new QComboBox();
-  topLayout->addWidget(m_FileSystemBucketComboBox);
-
-  m_FilePathTextBox = new QLineEdit();
-  topLayout->addWidget(m_FilePathTextBox);
+  m_filePathTextBox = new QLineEdit();
+  topLayout->addWidget(m_filePathTextBox);
 
   QSplitter* splitter = new QSplitter();
 
-  m_FileSystemTreeView = new QTreeView();
-  splitter->addWidget(m_FileSystemTreeView);
+  m_fileSystemTreeView = new QTreeView();
+  m_fileSystemTreeView->setSortingEnabled(true);
+  m_fileSystemTreeView->sortByColumn(0, Qt::AscendingOrder);
+  splitter->addWidget(m_fileSystemTreeView);
   splitter->setStretchFactor(0, 1);
 
-  m_FileSystemTableView = new QTableView();
-  splitter->addWidget(m_FileSystemTableView);
+  m_fileSystemTableView = new QTableView();
+  splitter->addWidget(m_fileSystemTableView);
   splitter->setStretchFactor(1, 2);
 
-  m_FileSystemTableView->horizontalHeader()->setStretchLastSection(true);
-  m_FileSystemTableView->verticalHeader()->setVisible(false);
-  m_FileSystemTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-  m_FileSystemTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+  m_fileSystemTableView->horizontalHeader()->setStretchLastSection(true);
+  m_fileSystemTableView->verticalHeader()->setVisible(false);
+  m_fileSystemTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+  m_fileSystemTableView->setSelectionMode(QAbstractItemView::SingleSelection);
 
   layout->addLayout(topLayout);
   layout->addWidget(splitter);
@@ -74,14 +76,21 @@ void FileSystemBrowserWidget::setGame(const std::shared_ptr<Model::Game>& game) 
 }
 
 void FileSystemBrowserWidget::refresh() {
+  // Unhook the models before refreshing, in case live sorting
+  // while the views are active causes performance issues.
+  m_fileSystemTreeView->setModel(nullptr);
+  m_fileSystemTableView->setModel(nullptr);
+
   Model::FileSystemBrowserModel* fsModel = m_Game ? &m_Game->fileSystemBrowserModel() : nullptr;
 
   if (fsModel) {
     fsModel->reset();
   }
 
-  m_FileSystemTreeView->setModel(fsModel);
-  m_FileSystemTableView->setModel(fsModel);
+  m_treeProxyModel->setSourceModel(fsModel);
+
+  m_fileSystemTreeView->setModel(m_treeProxyModel);
+  m_fileSystemTableView->setModel(fsModel);
 }
 } // namespace View
 } // namespace TrenchBroom
