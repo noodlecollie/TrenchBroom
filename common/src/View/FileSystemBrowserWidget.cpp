@@ -76,6 +76,10 @@ void FileSystemBrowserWidget::setGame(const std::shared_ptr<Model::Game>& game) 
 void FileSystemBrowserWidget::refresh() {
   Model::FileSystemBrowserModel* fsModel = m_Game ? &m_Game->fileSystemBrowserModel() : nullptr;
 
+  if (fsModel) {
+    fsModel->reset();
+  }
+
   m_FileSystemTreeView->setModel(fsModel);
   m_FileSystemTableView->setModel(fsModel);
 }

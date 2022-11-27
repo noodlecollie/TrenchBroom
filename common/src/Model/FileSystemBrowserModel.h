@@ -53,19 +53,23 @@ private:
   class Node {
   public:
     Node()
-      : m_fullPath(".") {}
+      : m_fullPath("") {}
 
-    Node(const IO::Path& fullPath, Node* parent = nullptr)
+    Node(const IO::Path& fullPath, Node* parent = nullptr, int indexInParent = 0)
       : m_parent(parent)
+      , m_indexInParent(indexInParent)
       , m_fullPath(fullPath) {}
 
     ~Node() { destroyChildren(); }
 
     Node* parent() const { return m_parent; }
+    int indexInParent() const { return m_indexInParent; }
     const IO::Path& fullPath() const { return m_fullPath; }
     bool isDirectory() const { return !m_children.isNull(); }
     bool isRoot() const { return m_parent == nullptr; }
     bool hasChildren() const { return m_children && m_children->count() > 0; }
+    bool isEvaluated() const { return m_isEvaluated; }
+    void setIsEvaluated(bool evaluated) { m_isEvaluated = evaluated; }
 
     void setIsDirectory(bool isDir) {
       if (isDir == isDirectory()) {
@@ -80,7 +84,7 @@ private:
     }
 
     QList<Node*>* childList() { return m_children.get(); }
-    const QList<Node*>* childList() const { return m_children.get(); }
+    QList<Node*>* childList() const { return m_children.get(); }
 
   private:
     void destroyChildren() {
@@ -91,13 +95,15 @@ private:
     }
 
     Node* m_parent = nullptr;
+    int m_indexInParent = 0;
     IO::Path m_fullPath;
     QScopedPointer<QList<Node*>> m_children;
+    bool m_isEvaluated = false;
   };
 
   using NodeHash = QHash<quintptr, Node*>;
 
-  static quintptr nodeToID(Node* node);
+  static quintptr nodeToID(const Node* node);
 
   Node* getNode(quintptr id);
   const Node* getNode(quintptr id) const;
@@ -105,11 +111,12 @@ private:
   Node* getNode(const QModelIndex& index);
   const Node* getNode(const QModelIndex& index) const;
 
-  void populateNode(Node& node);
+  void populateNode(Node& node) const;
+  void cheapDetermineIsDirectory(Node& node) const;
 
   IO::FileSystem* m_fs = nullptr;
   QScopedPointer<Node> m_rootFSNode;
-  NodeHash m_nodeHash;
+  mutable NodeHash m_nodeHash;
 };
 } // namespace Model
 } // namespace TrenchBroom
