@@ -40,7 +40,8 @@ public:
     ROLE_PATH = Qt::DisplayRole,
 
     // Custom roles:
-    ROLE_METAFLAGS = Qt::UserRole
+    ROLE_METAFLAGS = Qt::UserRole,
+    ROLE_FULL_PATH
   };
 
   enum MetaFlag {

@@ -29,7 +29,9 @@ class QTableView;
 namespace TrenchBroom {
 namespace Model {
 class Game;
+class FileSystemBrowserModel;
 class FileSystemBrowserTreeProxyModel;
+class FileSystemBrowserTableProxyModel;
 }
 
 namespace View {
@@ -41,6 +43,9 @@ public:
 
   void setGame(const std::shared_ptr<Model::Game>& game);
 
+private slots:
+  void onDirectoryActivated(const QModelIndex& index);
+
 private:
   void refresh();
 
@@ -50,7 +55,9 @@ private:
   QTreeView* m_fileSystemTreeView = nullptr;
   QTableView* m_fileSystemTableView = nullptr;
 
+  Model::FileSystemBrowserModel* m_fsModel = nullptr;
   Model::FileSystemBrowserTreeProxyModel* m_treeProxyModel = nullptr;
+  Model::FileSystemBrowserTableProxyModel* m_tableProxyModel = nullptr;
 };
 } // namespace View
 } // namespace TrenchBroom

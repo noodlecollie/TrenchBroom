@@ -17,15 +17,16 @@
  along with TrenchBroom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Model/FileSystemBrowserTreeProxyModel.h"
+#include "Model/FileSystemBrowserTableProxyModel.h"
 #include "Model/FileSystemBrowserModel.h"
+#include <QtDebug>
 
 namespace TrenchBroom {
 namespace Model {
-FileSystemBrowserTreeProxyModel::FileSystemBrowserTreeProxyModel(QObject* parent)
+FileSystemBrowserTableProxyModel::FileSystemBrowserTableProxyModel(QObject* parent)
   : QSortFilterProxyModel(parent) {}
 
-QVariant FileSystemBrowserTreeProxyModel::headerData(
+QVariant FileSystemBrowserTableProxyModel::headerData(
   int section, Qt::Orientation orientation, int role) const {
   if (role != Qt::DisplayRole) {
     return QVariant();
@@ -39,10 +40,14 @@ QVariant FileSystemBrowserTreeProxyModel::headerData(
     return QVariant();
   }
 
-  return QVariant(tr("File System"));
+  return QVariant(tr("Files"));
 }
 
-bool FileSystemBrowserTreeProxyModel::filterAcceptsRow(
+void FileSystemBrowserTableProxyModel::setRootForFiltering(const QModelIndex& sourceIndex) {
+  m_rootForFiltering = sourceIndex;
+}
+
+bool FileSystemBrowserTableProxyModel::filterAcceptsRow(
   int sourceRow, const QModelIndex& sourceParent) const {
   QAbstractItemModel* src = sourceModel();
 
@@ -51,10 +56,16 @@ bool FileSystemBrowserTreeProxyModel::filterAcceptsRow(
   }
 
   const QModelIndex srcIndex = src->index(sourceRow, 0, sourceParent);
+
+  if (srcIndex == m_rootForFiltering) {
+    // Always allowed, or children don't show up.
+    return true;
+  }
+
   const QVariant flagVar = src->data(srcIndex, Model::FileSystemBrowserModel::ROLE_METAFLAGS);
 
   return flagVar.isValid() &&
-         (flagVar.toInt() & Model::FileSystemBrowserModel::METAFLAG_IS_DIRECTORY);
+         !(flagVar.toInt() & Model::FileSystemBrowserModel::METAFLAG_IS_DIRECTORY);
 }
 } // namespace Model
 } // namespace TrenchBroom

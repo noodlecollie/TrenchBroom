@@ -25,16 +25,21 @@ namespace TrenchBroom {
 namespace Model {
 class FileSystemBrowserModel;
 
-class FileSystemBrowserTreeProxyModel : public QSortFilterProxyModel {
+class FileSystemBrowserTableProxyModel : public QSortFilterProxyModel {
   Q_OBJECT
 public:
-  explicit FileSystemBrowserTreeProxyModel(QObject* parent = nullptr);
+  explicit FileSystemBrowserTableProxyModel(QObject* parent = nullptr);
 
   QVariant headerData(
     int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+  void setRootForFiltering(const QModelIndex& sourceIndex);
+
 protected:
   bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+
+private:
+  QModelIndex m_rootForFiltering;
 };
 } // namespace Model
 } // namespace TrenchBroom

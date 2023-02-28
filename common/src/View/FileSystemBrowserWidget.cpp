@@ -20,6 +20,7 @@
 #include "View/FileSystemBrowserWidget.h"
 
 #include "Model/FileSystemBrowserModel.h"
+#include "Model/FileSystemBrowserTableProxyModel.h"
 #include "Model/FileSystemBrowserTreeProxyModel.h"
 #include "Model/Game.h"
 #include <QComboBox>
@@ -30,12 +31,14 @@
 #include <QTableView>
 #include <QTreeView>
 #include <QVBoxLayout>
+#include <QtDebug>
 
 namespace TrenchBroom {
 namespace View {
 FileSystemBrowserWidget::FileSystemBrowserWidget(QWidget* parent, Qt::WindowFlags f)
   : QWidget(parent, f) {
   m_treeProxyModel = new Model::FileSystemBrowserTreeProxyModel(this);
+  m_tableProxyModel = new Model::FileSystemBrowserTableProxyModel(this);
 
   QVBoxLayout* layout = new QVBoxLayout();
 
@@ -49,8 +52,14 @@ FileSystemBrowserWidget::FileSystemBrowserWidget(QWidget* parent, Qt::WindowFlag
   m_fileSystemTreeView = new QTreeView();
   m_fileSystemTreeView->setSortingEnabled(true);
   m_fileSystemTreeView->sortByColumn(0, Qt::AscendingOrder);
+  m_fileSystemTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+  m_fileSystemTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
   splitter->addWidget(m_fileSystemTreeView);
   splitter->setStretchFactor(0, 1);
+
+  connect(
+    m_fileSystemTreeView, &QTreeView::activated, this,
+    &FileSystemBrowserWidget::onDirectoryActivated);
 
   m_fileSystemTableView = new QTableView();
   splitter->addWidget(m_fileSystemTableView);
@@ -75,22 +84,32 @@ void FileSystemBrowserWidget::setGame(const std::shared_ptr<Model::Game>& game) 
   refresh();
 }
 
+void FileSystemBrowserWidget::onDirectoryActivated(const QModelIndex& index) {
+  const QModelIndex sourceIndex = m_treeProxyModel->mapToSource(index);
+
+  m_tableProxyModel->setRootForFiltering(sourceIndex);
+  m_fileSystemTableView->setRootIndex(m_tableProxyModel->mapFromSource(sourceIndex));
+}
+
 void FileSystemBrowserWidget::refresh() {
   // Unhook the models before refreshing, in case live sorting
   // while the views are active causes performance issues.
   m_fileSystemTreeView->setModel(nullptr);
   m_fileSystemTableView->setModel(nullptr);
 
-  Model::FileSystemBrowserModel* fsModel = m_Game ? &m_Game->fileSystemBrowserModel() : nullptr;
+  m_fsModel = m_Game ? &m_Game->fileSystemBrowserModel() : nullptr;
 
-  if (fsModel) {
-    fsModel->reset();
+  if (m_fsModel) {
+    m_fsModel->reset();
   }
 
-  m_treeProxyModel->setSourceModel(fsModel);
+  m_treeProxyModel->setSourceModel(m_fsModel);
+  m_tableProxyModel->setSourceModel(m_fsModel);
 
   m_fileSystemTreeView->setModel(m_treeProxyModel);
-  m_fileSystemTableView->setModel(fsModel);
+  m_fileSystemTreeView->setRootIndex(m_treeProxyModel->index(0, 0));
+
+  m_fileSystemTableView->setModel(m_tableProxyModel);
 }
 } // namespace View
 } // namespace TrenchBroom

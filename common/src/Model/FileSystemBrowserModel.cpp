@@ -70,6 +70,11 @@ QVariant FileSystemBrowserModel::data(const QModelIndex& index, int role) const 
       return QVariant(node->metaFlags());
     }
 
+    case ROLE_FULL_PATH: {
+      const IO::Path& path = node->fullPath();
+      return QVariant(QString::fromStdString(path.asString("/")));
+    }
+
     default: {
       return QVariant();
     }
@@ -90,7 +95,7 @@ QVariant FileSystemBrowserModel::headerData(
     return QVariant();
   }
 
-  return QVariant(tr("Path"));
+  return QVariant(tr("Node"));
 }
 
 int FileSystemBrowserModel::rowCount(const QModelIndex& parent) const {
