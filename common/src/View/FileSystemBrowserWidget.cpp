@@ -57,10 +57,6 @@ FileSystemBrowserWidget::FileSystemBrowserWidget(QWidget* parent, Qt::WindowFlag
   splitter->addWidget(m_fileSystemTreeView);
   splitter->setStretchFactor(0, 1);
 
-  connect(
-    m_fileSystemTreeView, &QTreeView::activated, this,
-    &FileSystemBrowserWidget::onDirectoryActivated);
-
   m_fileSystemTableView = new QTableView();
   splitter->addWidget(m_fileSystemTableView);
   splitter->setStretchFactor(1, 2);
@@ -72,6 +68,11 @@ FileSystemBrowserWidget::FileSystemBrowserWidget(QWidget* parent, Qt::WindowFlag
 
   layout->addLayout(topLayout);
   layout->addWidget(splitter);
+
+  connect(
+    m_fileSystemTreeView, &QTreeView::activated, this,
+    &FileSystemBrowserWidget::onDirectoryActivated);
+
   setLayout(layout);
 }
 

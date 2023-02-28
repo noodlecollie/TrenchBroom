@@ -44,7 +44,17 @@ QVariant FileSystemBrowserTableProxyModel::headerData(
 }
 
 void FileSystemBrowserTableProxyModel::setRootForFiltering(const QModelIndex& sourceIndex) {
+  if (m_rootForFiltering == sourceIndex) {
+    return;
+  }
+
   m_rootForFiltering = sourceIndex;
+
+  // This must be called, otherwise filtering does not get re-run! Re-filtering is required when
+  // this index changes, since a directory passes the filter when it is the root, but does not pass
+  // otherwise. If a previously encountered directory becomes the new root, it must be re-evaluated
+  // by the filter, otherwise none of its children are shown.
+  invalidateFilter();
 }
 
 bool FileSystemBrowserTableProxyModel::filterAcceptsRow(
