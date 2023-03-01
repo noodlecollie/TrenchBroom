@@ -73,6 +73,9 @@ FileSystemBrowserWidget::FileSystemBrowserWidget(QWidget* parent, Qt::WindowFlag
     m_fileSystemTreeView, &QTreeView::activated, this,
     &FileSystemBrowserWidget::onDirectoryActivated);
 
+  connect(
+    m_fileSystemTableView, &QTableView::activated, this, &FileSystemBrowserWidget::onFileActivated);
+
   setLayout(layout);
 }
 
@@ -86,10 +89,18 @@ void FileSystemBrowserWidget::setGame(const std::shared_ptr<Model::Game>& game) 
 }
 
 void FileSystemBrowserWidget::onDirectoryActivated(const QModelIndex& index) {
+  if (!index.isValid()) {
+    return;
+  }
+
   const QModelIndex sourceIndex = m_treeProxyModel->mapToSource(index);
 
   m_tableProxyModel->setRootForFiltering(sourceIndex);
   m_fileSystemTableView->setRootIndex(m_tableProxyModel->mapFromSource(sourceIndex));
+}
+
+void FileSystemBrowserWidget::onFileActivated(const QModelIndex& index) {
+  m_filePathTextBox->setText(getPathForTableViewItem(index));
 }
 
 void FileSystemBrowserWidget::refresh() {
@@ -111,6 +122,16 @@ void FileSystemBrowserWidget::refresh() {
   m_fileSystemTreeView->setRootIndex(m_treeProxyModel->index(0, 0));
 
   m_fileSystemTableView->setModel(m_tableProxyModel);
+}
+
+QString FileSystemBrowserWidget::getPathForTableViewItem(const QModelIndex& index) const {
+  if (!index.isValid()) {
+    return QString();
+  }
+
+  const QModelIndex sourceIndex = m_tableProxyModel->mapToSource(index);
+  return m_fsModel->data(sourceIndex, Model::FileSystemBrowserModel::DataRole::ROLE_FULL_PATH)
+    .toString();
 }
 } // namespace View
 } // namespace TrenchBroom

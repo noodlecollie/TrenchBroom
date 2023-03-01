@@ -19,7 +19,6 @@
 
 #include "Model/FileSystemBrowserTableProxyModel.h"
 #include "Model/FileSystemBrowserModel.h"
-#include <QtDebug>
 
 namespace TrenchBroom {
 namespace Model {
@@ -67,7 +66,7 @@ bool FileSystemBrowserTableProxyModel::filterAcceptsRow(
 
   const QModelIndex srcIndex = src->index(sourceRow, 0, sourceParent);
 
-  if (srcIndex == m_rootForFiltering) {
+  if (isFilterRootOrDirectAncestor(srcIndex)) {
     // Always allowed, or children don't show up.
     return true;
   }
@@ -76,6 +75,30 @@ bool FileSystemBrowserTableProxyModel::filterAcceptsRow(
 
   return flagVar.isValid() &&
          !(flagVar.toInt() & Model::FileSystemBrowserModel::METAFLAG_IS_DIRECTORY);
+}
+
+bool FileSystemBrowserTableProxyModel::isFilterRootOrDirectAncestor(
+  const QModelIndex& sourceIndex) const {
+  if (sourceIndex == m_rootForFiltering) {
+    return true;
+  }
+
+  // An invalid parent index means that this index is the file system root, which is always an
+  // ancestor of the filter root.
+  if (!sourceIndex.isValid() || !sourceIndex.parent().isValid()) {
+    return true;
+  }
+
+  for (QModelIndex parent = m_rootForFiltering.parent(); parent.isValid();
+       parent = parent.parent()) {
+    if (parent == sourceIndex) {
+      // Source index was on direct ancestry chain.
+      return true;
+    }
+  }
+
+  // We reached the global root from the filter root, and the source index was not on this chain.
+  return false;
 }
 } // namespace Model
 } // namespace TrenchBroom

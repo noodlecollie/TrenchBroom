@@ -45,9 +45,11 @@ public:
 
 private slots:
   void onDirectoryActivated(const QModelIndex& index);
+  void onFileActivated(const QModelIndex& index);
 
 private:
   void refresh();
+  QString getPathForTableViewItem(const QModelIndex& index) const;
 
   std::shared_ptr<Model::Game> m_Game;
 
