@@ -83,12 +83,17 @@ void FileSystemBrowserWidget::constructFileViewWidgets() {
   m_fileSystemTreeView->sortByColumn(0, Qt::AscendingOrder);
   m_fileSystemTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
   m_fileSystemTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
+  m_fileSystemTreeView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  m_fileSystemTreeView->setTextElideMode(Qt::ElideNone);
 
   m_fileSystemTableView = new QTableView();
   m_fileSystemTableView->horizontalHeader()->setStretchLastSection(true);
   m_fileSystemTableView->verticalHeader()->setVisible(false);
   m_fileSystemTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
   m_fileSystemTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+  m_fileSystemTableView->setSortingEnabled(true);
+  m_fileSystemTableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  m_fileSystemTableView->setTextElideMode(Qt::ElideNone);
 
   m_fileSystemSplitter = new QSplitter();
   m_fileSystemSplitter->addWidget(m_fileSystemTreeView);
@@ -112,6 +117,7 @@ void FileSystemBrowserWidget::constructFileFilterWidgets() {
 
   m_filePathTextBox = new QLineEdit();
   m_filePathTextBox->setReadOnly(true);
+  m_filePathTextBox->setPlaceholderText(tr("Select a file"));
   m_filterWidgetLayout->addWidget(m_filePathTextBox, 1, 0);
 
   m_acceptButtonLayout = new QHBoxLayout();
