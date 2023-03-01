@@ -63,7 +63,7 @@ QVariant FileSystemBrowserModel::data(const QModelIndex& index, int role) const 
       const QString pathString =
         QString::fromStdString((!path.components().empty()) ? path.lastComponent().asString() : "");
 
-      return QVariant((!pathString.isEmpty()) ? pathString : QString("File System"));
+      return QVariant((!pathString.isEmpty()) ? pathString : QString("/"));
     }
 
     case ROLE_METAFLAGS: {

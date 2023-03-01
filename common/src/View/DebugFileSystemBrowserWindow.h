@@ -40,9 +40,6 @@ public:
 
   void setGame(const std::shared_ptr<Model::Game>& game);
 
-private slots:
-  void onWildcardChanged(const QString& newWildcard);
-
 private:
   FileSystemBrowserWidget* m_BrowserWidget = nullptr;
   QLineEdit* m_WildcardLineEdit = nullptr;

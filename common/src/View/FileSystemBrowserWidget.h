@@ -25,6 +25,8 @@
 class QLineEdit;
 class QTreeView;
 class QTableView;
+class QComboBox;
+class QSplitter;
 
 namespace TrenchBroom {
 namespace Model {
@@ -42,21 +44,36 @@ public:
     QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
   void setGame(const std::shared_ptr<Model::Game>& game);
-  void setFileFilterWildcard(const QString& pattern);
 
 private slots:
   void onDirectoryActivated(const QModelIndex& index);
   void onFileActivated(const QModelIndex& index);
 
 private:
+  void constructUI();
+  void constructFileViewWidgets();
+  void constructFileFilterWidgets();
+  void connectSignals();
+
   void refresh();
+  void setTableViewRoot(const QModelIndex& sourceRoot);
   QString getPathForTableViewItem(const QModelIndex& index) const;
 
   std::shared_ptr<Model::Game> m_Game;
 
-  QLineEdit* m_filePathTextBox = nullptr;
+  QVBoxLayout* m_mainLayout = nullptr;
+  QSplitter* m_fileSystemSplitter = nullptr;
   QTreeView* m_fileSystemTreeView = nullptr;
   QTableView* m_fileSystemTableView = nullptr;
+
+  QGridLayout* m_filterWidgetLayout = nullptr;
+  QLineEdit* m_fileFilterTextBox = nullptr;
+  QLineEdit* m_filePathTextBox = nullptr;
+  QComboBox* m_fileTypeCombo = nullptr;
+
+  QHBoxLayout* m_acceptButtonLayout = nullptr;
+  QPushButton* m_chooseButton = nullptr;
+  QPushButton* m_cancelButton = nullptr;
 
   Model::FileSystemBrowserModel* m_fsModel = nullptr;
   Model::FileSystemBrowserTreeProxyModel* m_treeProxyModel = nullptr;

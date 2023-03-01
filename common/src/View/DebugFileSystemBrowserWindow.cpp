@@ -34,15 +34,6 @@ DebugFileSystemBrowserWindow::DebugFileSystemBrowserWindow(QWidget* parent)
   m_BrowserWidget = new FileSystemBrowserWidget();
   layout->addWidget(m_BrowserWidget);
 
-  m_WildcardLineEdit = new QLineEdit();
-  m_WildcardLineEdit->setPlaceholderText("Wildcard, eg. *.mdl");
-
-  connect(
-    m_WildcardLineEdit, &QLineEdit::textChanged, this,
-    &DebugFileSystemBrowserWindow::onWildcardChanged);
-
-  layout->addWidget(m_WildcardLineEdit);
-
   setLayout(layout);
 }
 
@@ -50,10 +41,6 @@ DebugFileSystemBrowserWindow::~DebugFileSystemBrowserWindow() {}
 
 void DebugFileSystemBrowserWindow::setGame(const std::shared_ptr<Model::Game>& game) {
   m_BrowserWidget->setGame(game);
-}
-
-void DebugFileSystemBrowserWindow::onWildcardChanged(const QString& newWildcard) {
-  m_BrowserWidget->setFileFilterWildcard(newWildcard);
 }
 } // namespace View
 } // namespace TrenchBroom

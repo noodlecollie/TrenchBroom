@@ -39,7 +39,7 @@ QVariant FileSystemBrowserTreeProxyModel::headerData(
     return QVariant();
   }
 
-  return QVariant(tr("File System"));
+  return QVariant(tr("Directories"));
 }
 
 bool FileSystemBrowserTreeProxyModel::filterAcceptsRow(
