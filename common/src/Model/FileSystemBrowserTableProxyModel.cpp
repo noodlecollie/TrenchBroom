@@ -71,10 +71,11 @@ bool FileSystemBrowserTableProxyModel::filterAcceptsRow(
     return true;
   }
 
-  const QVariant flagVar = src->data(srcIndex, Model::FileSystemBrowserModel::ROLE_METAFLAGS);
+  if (!indexRepresentsFile(srcIndex)) {
+    return false;
+  }
 
-  return flagVar.isValid() &&
-         !(flagVar.toInt() & Model::FileSystemBrowserModel::METAFLAG_IS_DIRECTORY);
+  return pathPassesFilter(srcIndex);
 }
 
 bool FileSystemBrowserTableProxyModel::isFilterRootOrDirectAncestor(
@@ -99,6 +100,28 @@ bool FileSystemBrowserTableProxyModel::isFilterRootOrDirectAncestor(
 
   // We reached the global root from the filter root, and the source index was not on this chain.
   return false;
+}
+
+bool FileSystemBrowserTableProxyModel::indexRepresentsFile(const QModelIndex& sourceIndex) const {
+  const QVariant flagVar =
+    sourceModel()->data(sourceIndex, Model::FileSystemBrowserModel::ROLE_METAFLAGS);
+
+  return flagVar.isValid() &&
+         !(flagVar.toInt() & Model::FileSystemBrowserModel::METAFLAG_IS_DIRECTORY);
+}
+
+bool FileSystemBrowserTableProxyModel::pathPassesFilter(const QModelIndex& sourceIndex) const {
+  const QRegExp regex = filterRegExp();
+
+  if (!regex.isValid()) {
+    // Nothing to filter against.
+    return true;
+  }
+
+  const QVariant pathVar =
+    sourceModel()->data(sourceIndex, Model::FileSystemBrowserModel::ROLE_FULL_PATH);
+
+  return pathVar.isValid() && pathVar.toString().contains(regex);
 }
 } // namespace Model
 } // namespace TrenchBroom

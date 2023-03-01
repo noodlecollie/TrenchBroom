@@ -38,6 +38,8 @@ public:
 protected:
   bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
   bool isFilterRootOrDirectAncestor(const QModelIndex& sourceIndex) const;
+  bool indexRepresentsFile(const QModelIndex& sourceIndex) const;
+  bool pathPassesFilter(const QModelIndex& sourceIndex) const;
 
 private:
   QModelIndex m_rootForFiltering;

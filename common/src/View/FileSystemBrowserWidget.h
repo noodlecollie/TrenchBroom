@@ -42,6 +42,7 @@ public:
     QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
   void setGame(const std::shared_ptr<Model::Game>& game);
+  void setFileFilterWildcard(const QString& pattern);
 
 private slots:
   void onDirectoryActivated(const QModelIndex& index);

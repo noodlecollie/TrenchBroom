@@ -88,6 +88,10 @@ void FileSystemBrowserWidget::setGame(const std::shared_ptr<Model::Game>& game) 
   refresh();
 }
 
+void FileSystemBrowserWidget::setFileFilterWildcard(const QString& pattern) {
+  m_tableProxyModel->setFilterWildcard(pattern);
+}
+
 void FileSystemBrowserWidget::onDirectoryActivated(const QModelIndex& index) {
   if (!index.isValid()) {
     return;
