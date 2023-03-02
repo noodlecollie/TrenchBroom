@@ -31,12 +31,13 @@
 #include <QTableView>
 #include <QTreeView>
 #include <QVBoxLayout>
-#include <QtDebug>
 
 namespace TrenchBroom {
 namespace View {
 static constexpr int STRETCH_FACTOR_DIR_TREE = 1;
 static constexpr int STRETCH_FACTOR_FILE_TABLE = 3;
+static constexpr const char* const DEFAULT_FILE_FILTER_DESC = "All files";
+static constexpr const char* const DEFAULT_FILE_FILTER_EXT = "";
 
 FileSystemBrowserWidget::FileSystemBrowserWidget(QWidget* parent, Qt::WindowFlags f)
   : QWidget(parent, f) {
@@ -55,6 +56,24 @@ void FileSystemBrowserWidget::setGame(const std::shared_ptr<Model::Game>& game) 
   refresh();
 }
 
+void FileSystemBrowserWidget::setFileTypeFilter(
+  const QString& fileDescription, const QString& fileExtension) {
+
+  QString wildcardExtension = fileExtension.trimmed();
+
+  if (wildcardExtension.isEmpty()) {
+    wildcardExtension = "*";
+  }
+
+  m_fileTypeCombo->clear();
+  m_fileTypeCombo->addItem(
+    QString("%1 (*.%2)").arg(fileDescription).arg(wildcardExtension), QVariant(wildcardExtension));
+}
+
+void FileSystemBrowserWidget::clearFileTypeFilter() {
+  setFileTypeFilter(DEFAULT_FILE_FILTER_DESC, DEFAULT_FILE_FILTER_EXT);
+}
+
 void FileSystemBrowserWidget::onDirectoryActivated(const QModelIndex& index) {
   if (!index.isValid()) {
     return;
@@ -67,6 +86,11 @@ void FileSystemBrowserWidget::onFileActivated(const QModelIndex& index) {
   m_filePathTextBox->setText(getPathForTableViewItem(index));
 }
 
+void FileSystemBrowserWidget::updateFileFilter() {
+  m_tableProxyModel->setFilterWildcard(
+    QString("%1*.%2").arg(m_fileFilterTextBox->text()).arg(getSelectedFileTypeWildcardExt()));
+}
+
 void FileSystemBrowserWidget::constructUI() {
   m_mainLayout = new QVBoxLayout();
   m_mainLayout->setMargin(0);
@@ -75,6 +99,7 @@ void FileSystemBrowserWidget::constructUI() {
   constructFileViewWidgets();
   constructFileFilterWidgets();
   connectSignals();
+  clearFileTypeFilter();
 
   setLayout(m_mainLayout);
 }
@@ -116,7 +141,6 @@ void FileSystemBrowserWidget::constructFileFilterWidgets() {
   m_filterWidgetLayout->addWidget(m_fileFilterTextBox, 0, 0);
 
   m_fileTypeCombo = new QComboBox();
-  m_fileTypeCombo->addItem(tr("File type")); // FIXME
   m_filterWidgetLayout->addWidget(m_fileTypeCombo, 0, 1);
 
   m_filePathTextBox = new QLineEdit();
@@ -147,6 +171,10 @@ void FileSystemBrowserWidget::connectSignals() {
 
   connect(
     m_fileSystemTableView, &QTableView::activated, this, &FileSystemBrowserWidget::onFileActivated);
+
+  // These are dynamic connections because the signatures don't match exactly.
+  connect(m_fileTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateFileFilter()));
+  connect(m_fileFilterTextBox, SIGNAL(textChanged(QString)), this, SLOT(updateFileFilter()));
 }
 
 void FileSystemBrowserWidget::refresh() {
@@ -188,6 +216,11 @@ QString FileSystemBrowserWidget::getPathForTableViewItem(const QModelIndex& inde
   const QModelIndex sourceIndex = m_tableProxyModel->mapToSource(index);
   return m_fsModel->data(sourceIndex, Model::FileSystemBrowserModel::DataRole::ROLE_FULL_PATH)
     .toString();
+}
+
+QString FileSystemBrowserWidget::getSelectedFileTypeWildcardExt() const {
+  const QString wildcardExt = m_fileTypeCombo->currentData().toString();
+  return (!wildcardExt.isEmpty()) ? wildcardExt : "*";
 }
 } // namespace View
 } // namespace TrenchBroom

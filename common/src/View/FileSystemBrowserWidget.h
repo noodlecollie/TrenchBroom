@@ -34,7 +34,7 @@ class Game;
 class FileSystemBrowserModel;
 class FileSystemBrowserTreeProxyModel;
 class FileSystemBrowserTableProxyModel;
-}
+} // namespace Model
 
 namespace View {
 class FileSystemBrowserWidget : public QWidget {
@@ -45,9 +45,14 @@ public:
 
   void setGame(const std::shared_ptr<Model::Game>& game);
 
+  // For filtering files, eg. setFileTypeFilter("Model files", "mdl")
+  void setFileTypeFilter(const QString& fileDescription, const QString& fileExtension);
+  void clearFileTypeFilter();
+
 private slots:
   void onDirectoryActivated(const QModelIndex& index);
   void onFileActivated(const QModelIndex& index);
+  void updateFileFilter();
 
 private:
   void constructUI();
@@ -58,6 +63,7 @@ private:
   void refresh();
   void setTableViewRoot(const QModelIndex& sourceRoot);
   QString getPathForTableViewItem(const QModelIndex& index) const;
+  QString getSelectedFileTypeWildcardExt() const;
 
   std::shared_ptr<Model::Game> m_Game;
 
