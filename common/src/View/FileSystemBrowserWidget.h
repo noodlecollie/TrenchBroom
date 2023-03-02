@@ -26,6 +26,7 @@ class QLineEdit;
 class QTreeView;
 class QComboBox;
 class QSplitter;
+class QItemSelection;
 
 namespace TrenchBroom {
 namespace Model {
@@ -48,10 +49,18 @@ public:
   void setFileTypeFilter(const QString& fileDescription, const QString& fileExtension);
   void clearFileTypeFilter();
 
+signals:
+  void fileChosen(const QString& path);
+
 private slots:
   void onDirectoryActivated(const QModelIndex& index);
   void onFileActivated(const QModelIndex& index);
+  void onFileSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+  void onDirectorySelectionChanged(
+    const QItemSelection& selected, const QItemSelection& deselected);
   void updateFileFilter();
+  void onFileChosen();
+  void onCancelled();
 
 private:
   void constructUI();
@@ -61,6 +70,7 @@ private:
 
   void refresh();
   void setTableViewRoot(const QModelIndex& sourceRoot);
+
   QString getPathForTableViewItem(const QModelIndex& index) const;
   QString getSelectedFileTypeWildcardExt() const;
 

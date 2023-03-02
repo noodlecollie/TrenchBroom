@@ -35,12 +35,20 @@ DebugFileSystemBrowserWindow::DebugFileSystemBrowserWindow(QWidget* parent)
   layout->addWidget(m_BrowserWidget);
 
   setLayout(layout);
+
+  connect(
+    m_BrowserWidget, &FileSystemBrowserWidget::fileChosen, this,
+    &DebugFileSystemBrowserWindow::onFileChosen);
 }
 
 DebugFileSystemBrowserWindow::~DebugFileSystemBrowserWindow() {}
 
 void DebugFileSystemBrowserWindow::setGame(const std::shared_ptr<Model::Game>& game) {
   m_BrowserWidget->setGame(game);
+}
+
+void DebugFileSystemBrowserWindow::onFileChosen(const QString& path) {
+  qDebug() << "DebugFileSystemBrowserWindow file chosen:" << path;
 }
 } // namespace View
 } // namespace TrenchBroom

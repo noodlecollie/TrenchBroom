@@ -86,9 +86,39 @@ void FileSystemBrowserWidget::onFileActivated(const QModelIndex& index) {
   m_filePathTextBox->setText(getPathForTableViewItem(index));
 }
 
+void FileSystemBrowserWidget::onFileSelectionChanged(
+  const QItemSelection& selected, const QItemSelection& deselected) {
+  Q_UNUSED(deselected);
+
+  // This should always only be one item - don't do anything if it's not.
+  if (selected.count() == 1) {
+    onFileActivated(selected.at(0).topLeft());
+  }
+}
+
+void FileSystemBrowserWidget::onDirectorySelectionChanged(
+  const QItemSelection& selected, const QItemSelection& deselected) {
+  Q_UNUSED(deselected);
+
+  // This should always only be one item - don't do anything if it's not.
+  if (selected.count() == 1) {
+    onDirectoryActivated(selected.at(0).topLeft());
+  }
+}
+
 void FileSystemBrowserWidget::updateFileFilter() {
   m_fileProxyModel->setFilterWildcard(
     QString("%1*.%2").arg(m_fileFilterTextBox->text()).arg(getSelectedFileTypeWildcardExt()));
+}
+
+void FileSystemBrowserWidget::onFileChosen() {
+  emit fileChosen(m_filePathTextBox->text());
+}
+
+void FileSystemBrowserWidget::onCancelled() {
+  m_filePathTextBox->clear();
+  m_fileView->clearSelection();
+  emit fileChosen(QString());
 }
 
 void FileSystemBrowserWidget::constructUI() {
@@ -170,9 +200,14 @@ void FileSystemBrowserWidget::connectSignals() {
   connect(
     m_directoryView, &QTreeView::activated, this, &FileSystemBrowserWidget::onDirectoryActivated);
 
-  connect(m_fileView, &QTreeView::activated, this, &FileSystemBrowserWidget::onFileActivated);
+  connect(m_fileView, &QTreeView::activated, [this](const QModelIndex&) {
+    onFileChosen();
+  });
 
-  // These are dynamic connections because the signatures don't match exactly.
+  connect(m_chooseButton, &QPushButton::clicked, this, &FileSystemBrowserWidget::onFileChosen);
+  connect(m_cancelButton, &QPushButton::clicked, this, &FileSystemBrowserWidget::onCancelled);
+
+  // These are dynamic connections because the signals have overloads and it confuses the compiler.
   connect(m_fileTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateFileFilter()));
   connect(m_fileFilterTextBox, SIGNAL(textChanged(QString)), this, SLOT(updateFileFilter()));
 }
@@ -201,9 +236,19 @@ void FileSystemBrowserWidget::refresh() {
 
   m_directoryView->setRootIndex(m_directoryProxyModel->mapFromSource(QModelIndex()));
   setTableViewRoot(m_fsModel->index(0, 0));
+
+  // These must be conected here, as the model must have been set before they will work.
+  connect(
+    m_fileView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+    &FileSystemBrowserWidget::onFileSelectionChanged);
+
+  connect(
+    m_directoryView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+    &FileSystemBrowserWidget::onDirectorySelectionChanged);
 }
 
 void FileSystemBrowserWidget::setTableViewRoot(const QModelIndex& sourceRoot) {
+  m_fileView->clearSelection();
   m_fileProxyModel->setRootForFiltering(sourceRoot);
   m_fileView->setRootIndex(m_fileProxyModel->mapFromSource(sourceRoot));
 }
