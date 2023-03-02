@@ -69,6 +69,8 @@ void FileSystemBrowserWidget::onFileActivated(const QModelIndex& index) {
 
 void FileSystemBrowserWidget::constructUI() {
   m_mainLayout = new QVBoxLayout();
+  m_mainLayout->setMargin(0);
+  m_mainLayout->setSpacing(20);
 
   constructFileViewWidgets();
   constructFileFilterWidgets();
@@ -106,6 +108,8 @@ void FileSystemBrowserWidget::constructFileViewWidgets() {
 
 void FileSystemBrowserWidget::constructFileFilterWidgets() {
   m_filterWidgetLayout = new QGridLayout();
+  m_filterWidgetLayout->setMargin(0);
+  m_filterWidgetLayout->setSpacing(8);
 
   m_fileFilterTextBox = new QLineEdit();
   m_fileFilterTextBox->setPlaceholderText(tr("Filter"));
@@ -117,10 +121,11 @@ void FileSystemBrowserWidget::constructFileFilterWidgets() {
 
   m_filePathTextBox = new QLineEdit();
   m_filePathTextBox->setReadOnly(true);
-  m_filePathTextBox->setPlaceholderText(tr("Select a file"));
+  m_filePathTextBox->setPlaceholderText(tr("Select a file above"));
   m_filterWidgetLayout->addWidget(m_filePathTextBox, 1, 0);
 
   m_acceptButtonLayout = new QHBoxLayout();
+  m_acceptButtonLayout->setMargin(0);
 
   m_chooseButton = new QPushButton();
   m_chooseButton->setText(tr("Choose"));
