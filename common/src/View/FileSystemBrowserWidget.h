@@ -24,7 +24,6 @@
 
 class QLineEdit;
 class QTreeView;
-class QTableView;
 class QComboBox;
 class QSplitter;
 
@@ -32,8 +31,8 @@ namespace TrenchBroom {
 namespace Model {
 class Game;
 class FileSystemBrowserModel;
-class FileSystemBrowserTreeProxyModel;
-class FileSystemBrowserTableProxyModel;
+class FileSystemDirectoryViewProxyModel;
+class FileSystemFileViewProxyModel;
 } // namespace Model
 
 namespace View {
@@ -69,8 +68,8 @@ private:
 
   QVBoxLayout* m_mainLayout = nullptr;
   QSplitter* m_fileSystemSplitter = nullptr;
-  QTreeView* m_fileSystemTreeView = nullptr;
-  QTableView* m_fileSystemTableView = nullptr;
+  QTreeView* m_directoryView = nullptr;
+  QTreeView* m_fileView = nullptr;
 
   QGridLayout* m_filterWidgetLayout = nullptr;
   QLineEdit* m_fileFilterTextBox = nullptr;
@@ -82,8 +81,8 @@ private:
   QPushButton* m_cancelButton = nullptr;
 
   Model::FileSystemBrowserModel* m_fsModel = nullptr;
-  Model::FileSystemBrowserTreeProxyModel* m_treeProxyModel = nullptr;
-  Model::FileSystemBrowserTableProxyModel* m_tableProxyModel = nullptr;
+  Model::FileSystemDirectoryViewProxyModel* m_directoryProxyModel = nullptr;
+  Model::FileSystemFileViewProxyModel* m_fileProxyModel = nullptr;
 };
 } // namespace View
 } // namespace TrenchBroom

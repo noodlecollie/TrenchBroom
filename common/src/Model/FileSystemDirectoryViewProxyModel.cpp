@@ -17,15 +17,15 @@
  along with TrenchBroom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Model/FileSystemBrowserTreeProxyModel.h"
 #include "Model/FileSystemBrowserModel.h"
+#include "Model/FileSystemDirectoryViewProxyModel.h"
 
 namespace TrenchBroom {
 namespace Model {
-FileSystemBrowserTreeProxyModel::FileSystemBrowserTreeProxyModel(QObject* parent)
+FileSystemDirectoryViewProxyModel::FileSystemDirectoryViewProxyModel(QObject* parent)
   : QSortFilterProxyModel(parent) {}
 
-QVariant FileSystemBrowserTreeProxyModel::headerData(
+QVariant FileSystemDirectoryViewProxyModel::headerData(
   int section, Qt::Orientation orientation, int role) const {
   if (role != Qt::DisplayRole) {
     return QVariant();
@@ -42,7 +42,7 @@ QVariant FileSystemBrowserTreeProxyModel::headerData(
   return QVariant(tr("Directories"));
 }
 
-bool FileSystemBrowserTreeProxyModel::filterAcceptsRow(
+bool FileSystemDirectoryViewProxyModel::filterAcceptsRow(
   int sourceRow, const QModelIndex& sourceParent) const {
   QAbstractItemModel* src = sourceModel();
 

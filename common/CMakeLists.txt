@@ -137,8 +137,8 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/EntityPropertiesVariableStore.cpp
         ${COMMON_SOURCE_DIR}/Model/EntityRotation.cpp
         ${COMMON_SOURCE_DIR}/Model/FileSystemBrowserModel.cpp
-        ${COMMON_SOURCE_DIR}/Model/FileSystemBrowserTableProxyModel.cpp
-        ${COMMON_SOURCE_DIR}/Model/FileSystemBrowserTreeProxyModel.cpp
+        ${COMMON_SOURCE_DIR}/Model/FileSystemFileViewProxyModel.cpp
+        ${COMMON_SOURCE_DIR}/Model/FileSystemDirectoryViewProxyModel.cpp
         ${COMMON_SOURCE_DIR}/Model/Game.cpp
         ${COMMON_SOURCE_DIR}/Model/GameConfig.cpp
         ${COMMON_SOURCE_DIR}/Model/GameEngineConfig.cpp
@@ -656,8 +656,8 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/EntityPropertiesVariableStore.h
         ${COMMON_SOURCE_DIR}/Model/EntityRotation.h
         ${COMMON_SOURCE_DIR}/Model/FileSystemBrowserModel.h
-        ${COMMON_SOURCE_DIR}/Model/FileSystemBrowserTableProxyModel.h
-        ${COMMON_SOURCE_DIR}/Model/FileSystemBrowserTreeProxyModel.h
+        ${COMMON_SOURCE_DIR}/Model/FileSystemFileViewProxyModel.h
+        ${COMMON_SOURCE_DIR}/Model/FileSystemDirectoryViewProxyModel.h
         ${COMMON_SOURCE_DIR}/Model/Game.h
         ${COMMON_SOURCE_DIR}/Model/GameConfig.h
         ${COMMON_SOURCE_DIR}/Model/GameEngineConfig.h

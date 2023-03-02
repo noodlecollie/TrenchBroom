@@ -17,15 +17,15 @@
  along with TrenchBroom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Model/FileSystemBrowserTableProxyModel.h"
 #include "Model/FileSystemBrowserModel.h"
+#include "Model/FileSystemFileViewProxyModel.h"
 
 namespace TrenchBroom {
 namespace Model {
-FileSystemBrowserTableProxyModel::FileSystemBrowserTableProxyModel(QObject* parent)
+FileSystemFileViewProxyModel::FileSystemFileViewProxyModel(QObject* parent)
   : QSortFilterProxyModel(parent) {}
 
-QVariant FileSystemBrowserTableProxyModel::headerData(
+QVariant FileSystemFileViewProxyModel::headerData(
   int section, Qt::Orientation orientation, int role) const {
   if (role != Qt::DisplayRole) {
     return QVariant();
@@ -42,7 +42,7 @@ QVariant FileSystemBrowserTableProxyModel::headerData(
   return QVariant(tr("Files"));
 }
 
-void FileSystemBrowserTableProxyModel::setRootForFiltering(const QModelIndex& sourceIndex) {
+void FileSystemFileViewProxyModel::setRootForFiltering(const QModelIndex& sourceIndex) {
   if (m_rootForFiltering == sourceIndex) {
     return;
   }
@@ -56,7 +56,7 @@ void FileSystemBrowserTableProxyModel::setRootForFiltering(const QModelIndex& so
   invalidateFilter();
 }
 
-bool FileSystemBrowserTableProxyModel::filterAcceptsRow(
+bool FileSystemFileViewProxyModel::filterAcceptsRow(
   int sourceRow, const QModelIndex& sourceParent) const {
   QAbstractItemModel* src = sourceModel();
 
@@ -78,7 +78,7 @@ bool FileSystemBrowserTableProxyModel::filterAcceptsRow(
   return pathPassesFilter(srcIndex);
 }
 
-bool FileSystemBrowserTableProxyModel::isFilterRootOrDirectAncestor(
+bool FileSystemFileViewProxyModel::isFilterRootOrDirectAncestor(
   const QModelIndex& sourceIndex) const {
   if (sourceIndex == m_rootForFiltering) {
     return true;
@@ -102,7 +102,7 @@ bool FileSystemBrowserTableProxyModel::isFilterRootOrDirectAncestor(
   return false;
 }
 
-bool FileSystemBrowserTableProxyModel::indexRepresentsFile(const QModelIndex& sourceIndex) const {
+bool FileSystemFileViewProxyModel::indexRepresentsFile(const QModelIndex& sourceIndex) const {
   const QVariant flagVar =
     sourceModel()->data(sourceIndex, Model::FileSystemBrowserModel::ROLE_METAFLAGS);
 
@@ -110,7 +110,7 @@ bool FileSystemBrowserTableProxyModel::indexRepresentsFile(const QModelIndex& so
          !(flagVar.toInt() & Model::FileSystemBrowserModel::METAFLAG_IS_DIRECTORY);
 }
 
-bool FileSystemBrowserTableProxyModel::pathPassesFilter(const QModelIndex& sourceIndex) const {
+bool FileSystemFileViewProxyModel::pathPassesFilter(const QModelIndex& sourceIndex) const {
   const QRegExp regex = filterRegExp();
 
   if (!regex.isValid()) {

@@ -20,8 +20,8 @@
 #include "View/FileSystemBrowserWidget.h"
 
 #include "Model/FileSystemBrowserModel.h"
-#include "Model/FileSystemBrowserTableProxyModel.h"
-#include "Model/FileSystemBrowserTreeProxyModel.h"
+#include "Model/FileSystemDirectoryViewProxyModel.h"
+#include "Model/FileSystemFileViewProxyModel.h"
 #include "Model/Game.h"
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -41,8 +41,8 @@ static constexpr const char* const DEFAULT_FILE_FILTER_EXT = "";
 
 FileSystemBrowserWidget::FileSystemBrowserWidget(QWidget* parent, Qt::WindowFlags f)
   : QWidget(parent, f) {
-  m_treeProxyModel = new Model::FileSystemBrowserTreeProxyModel(this);
-  m_tableProxyModel = new Model::FileSystemBrowserTableProxyModel(this);
+  m_directoryProxyModel = new Model::FileSystemDirectoryViewProxyModel(this);
+  m_fileProxyModel = new Model::FileSystemFileViewProxyModel(this);
 
   constructUI();
 }
@@ -79,7 +79,7 @@ void FileSystemBrowserWidget::onDirectoryActivated(const QModelIndex& index) {
     return;
   }
 
-  setTableViewRoot(m_treeProxyModel->mapToSource(index));
+  setTableViewRoot(m_directoryProxyModel->mapToSource(index));
 }
 
 void FileSystemBrowserWidget::onFileActivated(const QModelIndex& index) {
@@ -87,7 +87,7 @@ void FileSystemBrowserWidget::onFileActivated(const QModelIndex& index) {
 }
 
 void FileSystemBrowserWidget::updateFileFilter() {
-  m_tableProxyModel->setFilterWildcard(
+  m_fileProxyModel->setFilterWildcard(
     QString("%1*.%2").arg(m_fileFilterTextBox->text()).arg(getSelectedFileTypeWildcardExt()));
 }
 
@@ -105,27 +105,29 @@ void FileSystemBrowserWidget::constructUI() {
 }
 
 void FileSystemBrowserWidget::constructFileViewWidgets() {
-  m_fileSystemTreeView = new QTreeView();
-  m_fileSystemTreeView->setSortingEnabled(true);
-  m_fileSystemTreeView->sortByColumn(0, Qt::AscendingOrder);
-  m_fileSystemTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
-  m_fileSystemTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
-  m_fileSystemTreeView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-  m_fileSystemTreeView->setTextElideMode(Qt::ElideNone);
+  m_directoryView = new QTreeView();
+  m_directoryView->setUniformRowHeights(true);
+  m_directoryView->setSortingEnabled(true);
+  m_directoryView->sortByColumn(0, Qt::AscendingOrder);
+  m_directoryView->setSelectionBehavior(QAbstractItemView::SelectRows);
+  m_directoryView->setSelectionMode(QAbstractItemView::SingleSelection);
+  m_directoryView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  m_directoryView->setTextElideMode(Qt::ElideNone);
 
-  m_fileSystemTableView = new QTableView();
-  m_fileSystemTableView->horizontalHeader()->setStretchLastSection(true);
-  m_fileSystemTableView->verticalHeader()->setVisible(false);
-  m_fileSystemTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-  m_fileSystemTableView->setSelectionMode(QAbstractItemView::SingleSelection);
-  m_fileSystemTableView->setSortingEnabled(true);
-  m_fileSystemTableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-  m_fileSystemTableView->setTextElideMode(Qt::ElideNone);
+  m_fileView = new QTreeView();
+  m_fileView->setItemsExpandable(false);
+  m_fileView->setUniformRowHeights(true);
+  m_fileView->setSortingEnabled(true);
+  m_fileView->sortByColumn(0, Qt::AscendingOrder);
+  m_fileView->setSelectionBehavior(QAbstractItemView::SelectRows);
+  m_fileView->setSelectionMode(QAbstractItemView::SingleSelection);
+  m_fileView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  m_fileView->setTextElideMode(Qt::ElideNone);
 
   m_fileSystemSplitter = new QSplitter();
-  m_fileSystemSplitter->addWidget(m_fileSystemTreeView);
+  m_fileSystemSplitter->addWidget(m_directoryView);
   m_fileSystemSplitter->setStretchFactor(0, STRETCH_FACTOR_DIR_TREE);
-  m_fileSystemSplitter->addWidget(m_fileSystemTableView);
+  m_fileSystemSplitter->addWidget(m_fileView);
   m_fileSystemSplitter->setStretchFactor(1, STRETCH_FACTOR_FILE_TABLE);
 
   m_mainLayout->addWidget(m_fileSystemSplitter);
@@ -166,11 +168,9 @@ void FileSystemBrowserWidget::constructFileFilterWidgets() {
 
 void FileSystemBrowserWidget::connectSignals() {
   connect(
-    m_fileSystemTreeView, &QTreeView::activated, this,
-    &FileSystemBrowserWidget::onDirectoryActivated);
+    m_directoryView, &QTreeView::activated, this, &FileSystemBrowserWidget::onDirectoryActivated);
 
-  connect(
-    m_fileSystemTableView, &QTableView::activated, this, &FileSystemBrowserWidget::onFileActivated);
+  connect(m_fileView, &QTreeView::activated, this, &FileSystemBrowserWidget::onFileActivated);
 
   // These are dynamic connections because the signatures don't match exactly.
   connect(m_fileTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateFileFilter()));
@@ -180,8 +180,8 @@ void FileSystemBrowserWidget::connectSignals() {
 void FileSystemBrowserWidget::refresh() {
   // Unhook the models before refreshing, in case live sorting
   // while the views are active causes performance issues.
-  m_fileSystemTreeView->setModel(nullptr);
-  m_fileSystemTableView->setModel(nullptr);
+  m_directoryView->setModel(nullptr);
+  m_fileView->setModel(nullptr);
 
   m_fsModel = m_Game ? &m_Game->fileSystemBrowserModel() : nullptr;
 
@@ -189,23 +189,23 @@ void FileSystemBrowserWidget::refresh() {
     m_fsModel->reset();
   }
 
-  m_treeProxyModel->setSourceModel(m_fsModel);
-  m_tableProxyModel->setSourceModel(m_fsModel);
+  m_directoryProxyModel->setSourceModel(m_fsModel);
+  m_fileProxyModel->setSourceModel(m_fsModel);
 
-  m_fileSystemTreeView->setModel(m_treeProxyModel);
-  m_fileSystemTableView->setModel(m_tableProxyModel);
+  m_directoryView->setModel(m_directoryProxyModel);
+  m_fileView->setModel(m_fileProxyModel);
 
   if (!m_fsModel) {
     return;
   }
 
-  m_fileSystemTreeView->setRootIndex(m_treeProxyModel->mapFromSource(QModelIndex()));
+  m_directoryView->setRootIndex(m_directoryProxyModel->mapFromSource(QModelIndex()));
   setTableViewRoot(m_fsModel->index(0, 0));
 }
 
 void FileSystemBrowserWidget::setTableViewRoot(const QModelIndex& sourceRoot) {
-  m_tableProxyModel->setRootForFiltering(sourceRoot);
-  m_fileSystemTableView->setRootIndex(m_tableProxyModel->mapFromSource(sourceRoot));
+  m_fileProxyModel->setRootForFiltering(sourceRoot);
+  m_fileView->setRootIndex(m_fileProxyModel->mapFromSource(sourceRoot));
 }
 
 QString FileSystemBrowserWidget::getPathForTableViewItem(const QModelIndex& index) const {
@@ -213,7 +213,7 @@ QString FileSystemBrowserWidget::getPathForTableViewItem(const QModelIndex& inde
     return QString();
   }
 
-  const QModelIndex sourceIndex = m_tableProxyModel->mapToSource(index);
+  const QModelIndex sourceIndex = m_fileProxyModel->mapToSource(index);
   return m_fsModel->data(sourceIndex, Model::FileSystemBrowserModel::DataRole::ROLE_FULL_PATH)
     .toString();
 }
