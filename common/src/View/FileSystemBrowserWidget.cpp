@@ -74,6 +74,14 @@ void FileSystemBrowserWidget::clearFileTypeFilter() {
   setFileTypeFilter(DEFAULT_FILE_FILTER_DESC, DEFAULT_FILE_FILTER_EXT);
 }
 
+bool FileSystemBrowserWidget::fileIsSelected() const {
+  return !selectedFilePath().isEmpty();
+}
+
+QString FileSystemBrowserWidget::selectedFilePath() const {
+  return m_filePathTextBox->text();
+}
+
 void FileSystemBrowserWidget::onDirectoryActivated(const QModelIndex& index) {
   if (!index.isValid()) {
     return;
@@ -84,6 +92,7 @@ void FileSystemBrowserWidget::onDirectoryActivated(const QModelIndex& index) {
 
 void FileSystemBrowserWidget::onFileActivated(const QModelIndex& index) {
   m_filePathTextBox->setText(getPathForTableViewItem(index));
+  m_chooseButton->setEnabled(fileIsSelected());
 }
 
 void FileSystemBrowserWidget::onFileSelectionChanged(
@@ -112,13 +121,13 @@ void FileSystemBrowserWidget::updateFileFilter() {
 }
 
 void FileSystemBrowserWidget::onFileChosen() {
-  emit fileChosen(m_filePathTextBox->text());
+  emit fileChosen(selectedFilePath());
 }
 
 void FileSystemBrowserWidget::onCancelled() {
   m_filePathTextBox->clear();
   m_fileView->clearSelection();
-  emit fileChosen(QString());
+  emit fileChosen(selectedFilePath());
 }
 
 void FileSystemBrowserWidget::constructUI() {
@@ -185,6 +194,7 @@ void FileSystemBrowserWidget::constructFileFilterWidgets() {
 
   m_chooseButton = new QPushButton();
   m_chooseButton->setText(tr("Choose"));
+  m_chooseButton->setDefault(true);
   m_acceptButtonLayout->addWidget(m_chooseButton);
 
   m_cancelButton = new QPushButton();
