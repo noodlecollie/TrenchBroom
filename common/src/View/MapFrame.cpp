@@ -49,10 +49,10 @@
 #include "View/ClipTool.h"
 #include "View/ColorButton.h"
 #include "View/CompilationDialog.h"
-#include "View/DebugFileSystemBrowserWindow.h"
 #include "View/EdgeTool.h"
 #include "View/FaceInspector.h"
 #include "View/FaceTool.h"
+#include "View/FileSystemBrowserDialog.h"
 #include "View/FrameManager.h"
 #include "View/GLContextManager.h"
 #include "View/Grid.h"
@@ -1919,13 +1919,8 @@ void MapFrame::debugShowPalette() {
 }
 
 void MapFrame::debugShowFileSystemBrowser() {
-  DebugFileSystemBrowserWindow* window = new DebugFileSystemBrowserWindow(this);
-
-  if (m_document) {
-    window->setGame(m_document->game());
-  }
-
-  showModelessDialog(window);
+  const QString path = FileSystemBrowserDialog::getFile(m_document ? m_document->game() : nullptr);
+  qDebug() << "debugShowFileSystemBrowser: File selected:" << path;
 }
 
 void MapFrame::focusChange(QWidget* /* oldFocus */, QWidget* newFocus) {
