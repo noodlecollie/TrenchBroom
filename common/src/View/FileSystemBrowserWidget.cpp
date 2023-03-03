@@ -36,8 +36,6 @@ namespace TrenchBroom {
 namespace View {
 static constexpr int STRETCH_FACTOR_DIR_TREE = 1;
 static constexpr int STRETCH_FACTOR_FILE_TABLE = 3;
-static constexpr const char* const DEFAULT_FILE_FILTER_DESC = "All files";
-static constexpr const char* const DEFAULT_FILE_FILTER_EXT = "";
 
 FileSystemBrowserWidget::FileSystemBrowserWidget(QWidget* parent, Qt::WindowFlags f)
   : QWidget(parent, f) {
@@ -58,20 +56,28 @@ void FileSystemBrowserWidget::setGame(const std::shared_ptr<Model::Game>& game) 
 
 void FileSystemBrowserWidget::setFileTypeFilter(
   const QString& fileDescription, const QString& fileExtension) {
+  m_fileTypeCombo->clear();
 
-  QString wildcardExtension = fileExtension.trimmed();
+  QString trimmedFileDescription = fileDescription.trimmed();
+  QString trimmedFileExtension = fileExtension.trimmed();
 
-  if (wildcardExtension.isEmpty()) {
-    wildcardExtension = "*";
+  if (trimmedFileDescription.isEmpty() && trimmedFileExtension.isEmpty()) {
+    // Both empty implies the filter is cleared, so allow any file to be selected.
+    m_fileTypeCombo->addItem(tr("All Files (*.*)"), QVariant("*"));
+    return;
   }
 
-  m_fileTypeCombo->clear();
+  // If the extension is empty, allow any file but leave the description as it is.
+  if (trimmedFileExtension.isEmpty()) {
+    trimmedFileExtension = "*";
+  }
+
   m_fileTypeCombo->addItem(
-    QString("%1 (*.%2)").arg(fileDescription).arg(wildcardExtension), QVariant(wildcardExtension));
+    QString("%1 (*.%2)").arg(trimmedFileDescription).arg(trimmedFileExtension));
 }
 
 void FileSystemBrowserWidget::clearFileTypeFilter() {
-  setFileTypeFilter(DEFAULT_FILE_FILTER_DESC, DEFAULT_FILE_FILTER_EXT);
+  setFileTypeFilter("", "");
 }
 
 bool FileSystemBrowserWidget::fileIsSelected() const {
