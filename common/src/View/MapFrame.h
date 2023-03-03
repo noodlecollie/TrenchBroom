@@ -394,6 +394,7 @@ public:
   void debugThrowExceptionDuringCommand();
   void debugSetWindowSize();
   void debugShowPalette();
+  void debugShowFileSystemBrowser();
 
   void focusChange(QWidget* oldFocus, QWidget* newFocus);
 

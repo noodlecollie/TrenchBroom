@@ -21,6 +21,7 @@
 
 #include "FloatType.h"
 #include "IO/Path.h"
+#include "Model/FileSystemBrowserModel.h"
 #include "Model/Game.h"
 #include "Model/GameFileSystem.h"
 
@@ -43,6 +44,7 @@ class GameImpl : public Game {
 private:
   GameConfig& m_config;
   GameFileSystem m_fs;
+  FileSystemBrowserModel m_fsBrowserModel;
   IO::Path m_gamePath;
   std::vector<IO::Path> m_additionalSearchPaths;
 
@@ -59,6 +61,8 @@ private:
   void doSetAdditionalSearchPaths(
     const std::vector<IO::Path>& searchPaths, Logger& logger) override;
   PathErrors doCheckAdditionalSearchPaths(const std::vector<IO::Path>& searchPaths) const override;
+  FileSystemBrowserModel& doFileSystemBrowserModel() override;
+  const FileSystemBrowserModel& doFileSystemBrowserModel() const override;
 
   const CompilationConfig& doCompilationConfig() override;
 

@@ -54,6 +54,7 @@ struct FlagsConfig;
 class Node;
 class SmartTag;
 class WorldNode;
+class FileSystemBrowserModel;
 
 class Game : public IO::EntityDefinitionLoader, public IO::EntityModelLoader {
 public:
@@ -69,6 +70,8 @@ public:
   IO::Path gamePath() const;
   void setGamePath(const IO::Path& gamePath, Logger& logger);
   void setAdditionalSearchPaths(const std::vector<IO::Path>& searchPaths, Logger& logger);
+  FileSystemBrowserModel& fileSystemBrowserModel();
+  const FileSystemBrowserModel& fileSystemBrowserModel() const;
 
   using PathErrors = std::map<IO::Path, std::string>;
   PathErrors checkAdditionalSearchPaths(const std::vector<IO::Path>& searchPaths) const;
@@ -162,6 +165,8 @@ private: // subclassing interface
     const std::vector<IO::Path>& searchPaths, Logger& logger) = 0;
   virtual PathErrors doCheckAdditionalSearchPaths(
     const std::vector<IO::Path>& searchPaths) const = 0;
+  virtual FileSystemBrowserModel& doFileSystemBrowserModel() = 0;
+  virtual const FileSystemBrowserModel& doFileSystemBrowserModel() const = 0;
 
   virtual const CompilationConfig& doCompilationConfig() = 0;
   virtual size_t doMaxPropertyLength() const = 0;

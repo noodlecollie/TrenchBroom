@@ -52,6 +52,7 @@
 #include "View/EdgeTool.h"
 #include "View/FaceInspector.h"
 #include "View/FaceTool.h"
+#include "View/FileSystemBrowserDialog.h"
 #include "View/FrameManager.h"
 #include "View/GLContextManager.h"
 #include "View/Grid.h"
@@ -1915,6 +1916,11 @@ void MapFrame::debugSetWindowSize() {
 void MapFrame::debugShowPalette() {
   DebugPaletteWindow* window = new DebugPaletteWindow(this);
   showModelessDialog(window);
+}
+
+void MapFrame::debugShowFileSystemBrowser() {
+  const QString path = FileSystemBrowserDialog::getFile(m_document ? m_document->game() : nullptr);
+  qDebug() << "debugShowFileSystemBrowser: File selected:" << path;
 }
 
 void MapFrame::focusChange(QWidget* /* oldFocus */, QWidget* newFocus) {

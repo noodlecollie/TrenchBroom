@@ -22,21 +22,17 @@
 #include "Assets/EntityModel_Forward.h"
 #include "Assets/Texture.h"
 #include "IO/EntityModelParser.h"
+#include "IO/FileSystem.h"
 #include "IO/Reader.h"
 #include "IO/SourceMdlDataAccessor.h"
 #include "IO/SourceMdlLayout.h"
 #include "IO/SourceVtxDataAccessor.h"
 #include "IO/SourceVvdLayout.h"
-#include "Model/GameFileSystem.h"
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace TrenchBroom {
-namespace Model {
-class GameFileSystem;
-}
-
 namespace IO {
 class Reader;
 class File;
@@ -45,14 +41,14 @@ class SourceMdlParser : public EntityModelParser {
 public:
   SourceMdlParser(
     const IO::Path& path, const std::string& name, const char* begin, const char* end,
-    const Model::GameFileSystem& fs);
+    const IO::FileSystem& fs);
 
 private:
   struct TextureLookupData {
     std::vector<std::string> textureDirs;
     std::vector<std::string> texturePaths;
 
-    std::shared_ptr<File> openTextureFile(const Model::GameFileSystem& fs, size_t index) const;
+    std::shared_ptr<File> openTextureFile(const IO::FileSystem& fs, size_t index) const;
   };
 
   struct ModelData {
@@ -95,7 +91,7 @@ private:
   std::string m_name;
   const char* m_begin;
   const char* m_end;
-  const Model::GameFileSystem& m_fs;
+  const IO::FileSystem& m_fs;
   std::unique_ptr<SourceMdlDataAccessor> m_mdlData;
 };
 } // namespace IO

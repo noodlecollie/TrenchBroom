@@ -136,6 +136,9 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/EntityProperties.cpp
         ${COMMON_SOURCE_DIR}/Model/EntityPropertiesVariableStore.cpp
         ${COMMON_SOURCE_DIR}/Model/EntityRotation.cpp
+        ${COMMON_SOURCE_DIR}/Model/FileSystemBrowserModel.cpp
+        ${COMMON_SOURCE_DIR}/Model/FileSystemFileViewProxyModel.cpp
+        ${COMMON_SOURCE_DIR}/Model/FileSystemDirectoryViewProxyModel.cpp
         ${COMMON_SOURCE_DIR}/Model/Game.cpp
         ${COMMON_SOURCE_DIR}/Model/GameConfig.cpp
         ${COMMON_SOURCE_DIR}/Model/GameEngineConfig.cpp
@@ -342,6 +345,8 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/View/FaceInspector.cpp
         ${COMMON_SOURCE_DIR}/View/FaceTool.cpp
         ${COMMON_SOURCE_DIR}/View/FaceToolController.cpp
+        ${COMMON_SOURCE_DIR}/View/FileSystemBrowserDialog.cpp
+        ${COMMON_SOURCE_DIR}/View/FileSystemBrowserWidget.cpp
         ${COMMON_SOURCE_DIR}/View/FileTextureCollectionEditor.cpp
         ${COMMON_SOURCE_DIR}/View/FlagsEditor.cpp
         ${COMMON_SOURCE_DIR}/View/FlagsPopupEditor.cpp
@@ -650,6 +655,9 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/EntityProperties.h
         ${COMMON_SOURCE_DIR}/Model/EntityPropertiesVariableStore.h
         ${COMMON_SOURCE_DIR}/Model/EntityRotation.h
+        ${COMMON_SOURCE_DIR}/Model/FileSystemBrowserModel.h
+        ${COMMON_SOURCE_DIR}/Model/FileSystemFileViewProxyModel.h
+        ${COMMON_SOURCE_DIR}/Model/FileSystemDirectoryViewProxyModel.h
         ${COMMON_SOURCE_DIR}/Model/Game.h
         ${COMMON_SOURCE_DIR}/Model/GameConfig.h
         ${COMMON_SOURCE_DIR}/Model/GameEngineConfig.h
@@ -885,6 +893,8 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/View/FaceInspector.h
         ${COMMON_SOURCE_DIR}/View/FaceTool.h
         ${COMMON_SOURCE_DIR}/View/FaceToolController.h
+        ${COMMON_SOURCE_DIR}/View/FileSystemBrowserDialog.h
+        ${COMMON_SOURCE_DIR}/View/FileSystemBrowserWidget.h
         ${COMMON_SOURCE_DIR}/View/FileTextureCollectionEditor.h
         ${COMMON_SOURCE_DIR}/View/FlagsEditor.h
         ${COMMON_SOURCE_DIR}/View/FlagsPopupEditor.h

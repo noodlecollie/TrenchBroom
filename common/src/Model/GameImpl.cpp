@@ -86,6 +86,7 @@ namespace TrenchBroom {
 namespace Model {
 GameImpl::GameImpl(GameConfig& config, const IO::Path& gamePath, Logger& logger)
   : m_config(config)
+  , m_fsBrowserModel(&m_fs)
   , m_gamePath(gamePath) {
   initializeFileSystem(logger);
 }
@@ -128,6 +129,14 @@ Game::PathErrors GameImpl::doCheckAdditionalSearchPaths(
     }
   }
   return result;
+}
+
+FileSystemBrowserModel& GameImpl::doFileSystemBrowserModel() {
+  return m_fsBrowserModel;
+}
+
+const FileSystemBrowserModel& GameImpl::doFileSystemBrowserModel() const {
+  return m_fsBrowserModel;
 }
 
 const CompilationConfig& GameImpl::doCompilationConfig() {
