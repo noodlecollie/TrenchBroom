@@ -139,7 +139,7 @@ private:
   std::weak_ptr<MapDocument> m_document;
 
 public:
-  explicit EntityPropertyModel(std::weak_ptr<MapDocument> document, QObject* parent);
+  explicit EntityPropertyModel(const std::weak_ptr<MapDocument>& document, QObject* parent);
 
   bool showDefaultRows() const;
   void setShowDefaultRows(bool showDefaultRows);

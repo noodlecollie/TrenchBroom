@@ -19,8 +19,11 @@
 
 #include "EntityPropertyItemDelegate.h"
 
+#include "Model/EntityProperties.h"
 #include "View/EntityPropertyModel.h"
 #include "View/EntityPropertyTable.h"
+#include "View/FilePickerPropertyEditor.h"
+#include "View/MapDocument.h"
 
 #include <string>
 #include <vector>
@@ -35,15 +38,27 @@
 namespace TrenchBroom {
 namespace View {
 EntityPropertyItemDelegate::EntityPropertyItemDelegate(
-  EntityPropertyTable* table, const EntityPropertyModel* model,
+  std::weak_ptr<MapDocument> document, EntityPropertyTable* table, const EntityPropertyModel* model,
   const QSortFilterProxyModel* proxyModel, QWidget* parent)
   : QStyledItemDelegate(parent)
+  , m_document(document)
   , m_table(table)
   , m_model(model)
   , m_proxyModel(proxyModel) {}
 
 QWidget* EntityPropertyItemDelegate::createEditor(
   QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+  // The alternative to jumping in here would be to register a new type for certain properties, and
+  // use QItemEditorFactory::registerEditor() to specify the type of widget to create for this new
+  // type. However, I don't think that would quite be what we'd want here, since the property isn't
+  // a different type per se to any other property - we just use a picker to fill in the data.
+  // Therefore, we check here to see if the key is something we should use a picker for, and swap
+  // out the editor widget if we need to.
+  const QModelIndex sourceIndex = m_proxyModel->mapToSource(index);
+  if (m_model->propertyKey(sourceIndex.row()) == Model::EntityPropertyKeys::StudioModel) {
+    return new FilePickerPropertyEditor(m_document, parent);
+  }
+
   auto* editor = QStyledItemDelegate::createEditor(parent, option, index);
   auto* lineEdit = dynamic_cast<QLineEdit*>(editor);
   if (lineEdit != nullptr) {

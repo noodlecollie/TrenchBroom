@@ -214,7 +214,8 @@ void EntityPropertyGrid::createGui(std::weak_ptr<MapDocument> document) {
                          // ignores the column part of the QModelIndex
   m_table->setModel(m_proxyModel);
 
-  m_table->setItemDelegate(new EntityPropertyItemDelegate(m_table, m_model, m_proxyModel, m_table));
+  m_table->setItemDelegate(
+    new EntityPropertyItemDelegate(document, m_table, m_model, m_proxyModel, m_table));
 
   autoResizeRows(m_table);
 

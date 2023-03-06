@@ -61,6 +61,7 @@ extern const std::string LinkedGroupId;
 extern const std::string Message;
 extern const std::string ValveVersion;
 extern const std::string SoftMapBounds;
+extern const std::string StudioModel;
 } // namespace EntityPropertyKeys
 
 namespace EntityPropertyValues {

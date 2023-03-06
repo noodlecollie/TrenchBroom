@@ -20,6 +20,7 @@
 #pragma once
 
 #include <QStyledItemDelegate>
+#include <memory>
 
 class QLineEdit;
 class QSortFilterProxyModel;
@@ -28,18 +29,21 @@ namespace TrenchBroom {
 namespace View {
 class EntityPropertyModel;
 class EntityPropertyTable;
+class MapDocument;
 
 class EntityPropertyItemDelegate : public QStyledItemDelegate {
   Q_OBJECT
 private:
+  std::weak_ptr<MapDocument> m_document;
   EntityPropertyTable* m_table;
   const EntityPropertyModel* m_model;
   const QSortFilterProxyModel* m_proxyModel;
 
 public:
   EntityPropertyItemDelegate(
-    EntityPropertyTable* table, const EntityPropertyModel* model,
-    const QSortFilterProxyModel* proxyModel, QWidget* parent = nullptr);
+    std::weak_ptr<MapDocument> document, EntityPropertyTable* table,
+    const EntityPropertyModel* model, const QSortFilterProxyModel* proxyModel,
+    QWidget* parent = nullptr);
 
   QWidget* createEditor(
     QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;

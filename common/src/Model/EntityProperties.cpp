@@ -62,6 +62,7 @@ const std::string LinkedGroupId = "_tb_linked_group_id";
 const std::string Message = "_tb_message";
 const std::string ValveVersion = "mapversion";
 const std::string SoftMapBounds = "_tb_soft_map_bounds";
+const std::string StudioModel = "model";
 } // namespace EntityPropertyKeys
 
 namespace EntityPropertyValues {

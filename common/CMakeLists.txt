@@ -345,6 +345,7 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/View/FaceInspector.cpp
         ${COMMON_SOURCE_DIR}/View/FaceTool.cpp
         ${COMMON_SOURCE_DIR}/View/FaceToolController.cpp
+        ${COMMON_SOURCE_DIR}/View/FilePickerPropertyEditor.cpp
         ${COMMON_SOURCE_DIR}/View/FileSystemBrowserDialog.cpp
         ${COMMON_SOURCE_DIR}/View/FileSystemBrowserWidget.cpp
         ${COMMON_SOURCE_DIR}/View/FileTextureCollectionEditor.cpp
@@ -893,6 +894,7 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/View/FaceInspector.h
         ${COMMON_SOURCE_DIR}/View/FaceTool.h
         ${COMMON_SOURCE_DIR}/View/FaceToolController.h
+        ${COMMON_SOURCE_DIR}/View/FilePickerPropertyEditor.h
         ${COMMON_SOURCE_DIR}/View/FileSystemBrowserDialog.h
         ${COMMON_SOURCE_DIR}/View/FileSystemBrowserWidget.h
         ${COMMON_SOURCE_DIR}/View/FileTextureCollectionEditor.h

@@ -344,11 +344,12 @@ std::string PropertyRow::newPropertyKeyForEntityNodes(
 
 // EntityPropertyModel
 
-EntityPropertyModel::EntityPropertyModel(std::weak_ptr<MapDocument> document, QObject* parent)
+EntityPropertyModel::EntityPropertyModel(
+  const std::weak_ptr<MapDocument>& document, QObject* parent)
   : QAbstractTableModel(parent)
   , m_showDefaultRows(true)
   , m_shouldShowProtectedProperties(false)
-  , m_document(std::move(document)) {
+  , m_document(document) {
   updateFromMapDocument();
 }
 
