@@ -29,6 +29,7 @@ class QLineEdit;
 namespace TrenchBroom {
 namespace View {
 class MapDocument;
+class FileSystemBrowserDialog;
 
 class FilePickerPropertyEditor : public QWidget {
   Q_OBJECT
@@ -41,10 +42,20 @@ public:
   QString filePath() const;
   void setFilePath(const QString& path);
 
+  // For filtering files, eg. setFileTypeFilter("Model files", "mdl")
+  void setFileTypeFilter(const QString& fileDescription, const QString& fileExtension);
+  void clearFileTypeFilter();
+
 private slots:
   void openPickerDialog();
+  void pickerDialogAccepted();
+  void pickerDialogRejected();
 
 private:
+  void lockForPicking();
+  void unlockAfterPicking();
+  bool isLockedForPicking();
+
   std::weak_ptr<MapDocument> m_document;
 
   // For when the picker dialogue is open - we want to keep a strong reference to the document at
@@ -54,6 +65,7 @@ private:
   QHBoxLayout* m_layout = nullptr;
   QLineEdit* m_lineEdit = nullptr;
   QPushButton* m_pickerButton = nullptr;
+  FileSystemBrowserDialog* m_fsDialog = nullptr;
 };
 } // namespace View
 } // namespace TrenchBroom

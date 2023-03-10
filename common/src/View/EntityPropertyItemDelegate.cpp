@@ -56,7 +56,9 @@ QWidget* EntityPropertyItemDelegate::createEditor(
   // out the editor widget if we need to.
   const QModelIndex sourceIndex = m_proxyModel->mapToSource(index);
   if (m_model->propertyKey(sourceIndex.row()) == Model::EntityPropertyKeys::StudioModel) {
-    return new FilePickerPropertyEditor(m_document, parent);
+    FilePickerPropertyEditor* editor = new FilePickerPropertyEditor(m_document, parent);
+    editor->setFileTypeFilter(tr("Model files"), "mdl");
+    return editor;
   }
 
   auto* editor = QStyledItemDelegate::createEditor(parent, option, index);

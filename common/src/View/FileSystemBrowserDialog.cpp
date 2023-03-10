@@ -42,6 +42,15 @@ void FileSystemBrowserDialog::setGame(const std::shared_ptr<Model::Game>& game) 
   m_browserWidget->setGame(game);
 }
 
+void FileSystemBrowserDialog::setFileTypeFilter(
+  const QString& fileDescription, const QString& fileExtension) {
+  m_browserWidget->setFileTypeFilter(fileDescription, fileExtension);
+}
+
+void FileSystemBrowserDialog::clearFileTypeFilter() {
+  m_browserWidget->clearFileTypeFilter();
+}
+
 bool FileSystemBrowserDialog::fileIsSelected() const {
   return m_browserWidget->fileIsSelected();
 }

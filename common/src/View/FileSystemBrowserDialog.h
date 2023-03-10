@@ -40,6 +40,10 @@ public:
 
   void setGame(const std::shared_ptr<Model::Game>& game);
 
+  // For filtering files, eg. setFileTypeFilter("Model files", "mdl")
+  void setFileTypeFilter(const QString& fileDescription, const QString& fileExtension);
+  void clearFileTypeFilter();
+
   bool fileIsSelected() const;
   QString selectedFilePath() const;
 

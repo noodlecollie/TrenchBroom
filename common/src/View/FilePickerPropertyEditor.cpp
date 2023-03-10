@@ -17,8 +17,6 @@
  along with TrenchBroom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 #include "View/FilePickerPropertyEditor.h"
 
 #include "Ensure.h"
@@ -47,9 +45,21 @@ FilePickerPropertyEditor::FilePickerPropertyEditor(
   m_pickerButton->setText(tr("Choose"));
   m_layout->addWidget(m_pickerButton);
 
+  m_fsDialog = new FileSystemBrowserDialog(this);
+  m_fsDialog->setWindowTitle(tr("Select a file"));
+  m_fsDialog->setModal(true);
+
   setLayout(m_layout);
 
   connect(m_pickerButton, &QPushButton::clicked, this, &FilePickerPropertyEditor::openPickerDialog);
+
+  connect(
+    m_fsDialog, &FileSystemBrowserDialog::accepted, this,
+    &FilePickerPropertyEditor::pickerDialogAccepted);
+
+  connect(
+    m_fsDialog, &FileSystemBrowserDialog::rejected, this,
+    &FilePickerPropertyEditor::pickerDialogRejected);
 }
 
 QString FilePickerPropertyEditor::filePath() const {
@@ -60,18 +70,46 @@ void FilePickerPropertyEditor::setFilePath(const QString& path) {
   m_lineEdit->setText(path);
 }
 
+void FilePickerPropertyEditor::setFileTypeFilter(
+  const QString& fileDescription, const QString& fileExtension) {
+  m_fsDialog->setFileTypeFilter(fileDescription, fileExtension);
+}
+
+void FilePickerPropertyEditor::clearFileTypeFilter() {
+  m_fsDialog->clearFileTypeFilter();
+}
+
 void FilePickerPropertyEditor::openPickerDialog() {
-  // m_documentSharedPtr = kdl::mem_lock(m_document);
-  // const QString path = FileSystemBrowserDialog::getFile(m_documentSharedPtr->game());
+  if (isLockedForPicking()) {
+    return;
+  }
 
-  // if (!path.isEmpty()) {
-  //   m_lineEdit->setText(path);
-  // }
+  lockForPicking();
 
-  // m_documentSharedPtr.reset();
+  m_fsDialog->setGame(m_documentSharedPtr->game());
+  m_fsDialog->show();
+}
 
-  // TODO: The above freezes up the application, and also doesn't submit the data once the editing
-  // is finished.
+void FilePickerPropertyEditor::pickerDialogAccepted() {
+  m_lineEdit->setText(m_fsDialog->selectedFilePath());
+  unlockAfterPicking();
+}
+
+void FilePickerPropertyEditor::pickerDialogRejected() {
+  // Don't modify the contents of the line edit.
+  unlockAfterPicking();
+}
+
+void FilePickerPropertyEditor::lockForPicking() {
+  m_documentSharedPtr = kdl::mem_lock(m_document);
+}
+
+void FilePickerPropertyEditor::unlockAfterPicking() {
+  m_documentSharedPtr.reset();
+}
+
+bool FilePickerPropertyEditor::isLockedForPicking() {
+  return m_documentSharedPtr.operator bool();
 }
 } // namespace View
 } // namespace TrenchBroom

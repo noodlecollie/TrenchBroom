@@ -73,7 +73,8 @@ void FileSystemBrowserWidget::setFileTypeFilter(
   }
 
   m_fileTypeCombo->addItem(
-    QString("%1 (*.%2)").arg(trimmedFileDescription).arg(trimmedFileExtension));
+    QString("%1 (*.%2)").arg(trimmedFileDescription).arg(trimmedFileExtension),
+    QVariant(trimmedFileExtension));
 }
 
 void FileSystemBrowserWidget::clearFileTypeFilter() {
@@ -185,6 +186,7 @@ void FileSystemBrowserWidget::constructFileFilterWidgets() {
 
   m_fileFilterTextBox = new QLineEdit();
   m_fileFilterTextBox->setPlaceholderText(tr("Filter"));
+  m_fileFilterTextBox->setClearButtonEnabled(true);
   m_filterWidgetLayout->addWidget(m_fileFilterTextBox, 0, 0);
 
   m_fileTypeCombo = new QComboBox();

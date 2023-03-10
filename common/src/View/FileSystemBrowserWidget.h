@@ -48,6 +48,7 @@ public:
   // For filtering files, eg. setFileTypeFilter("Model files", "mdl")
   void setFileTypeFilter(const QString& fileDescription, const QString& fileExtension);
   void clearFileTypeFilter();
+
   bool fileIsSelected() const;
   QString selectedFilePath() const;
 
